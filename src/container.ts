@@ -5,7 +5,8 @@ import {
   InjectDIToken,
   ImplementToken,
   ImplementDIValue,
-  IConstructor
+  IConstructor,
+  IBonbonsInjectable
 } from "@bonbons/contracts";
 import { DependencyQueue } from "./dependency";
 import { invalidOperation, invalidParam, TypeCheck } from "@bonbons/utils";
@@ -23,11 +24,11 @@ class DIEntry implements BonbonsDIEntry {
 export class DIContainer implements BonbonsDIContainer {
 
   private deps_queue = new DependencyQueue();
-  protected _pool = new Map<InjectDIToken, DIEntry>();
+  protected _pool = new Map<InjectDIToken<IBonbonsInjectable>, DIEntry>();
 
   public get count() { return this._pool.size; }
 
-  public get<T>(token: InjectDIToken): T {
+  public get<T>(token: InjectDIToken<T>): T {
     const entry = this._pool.get(token);
     return entry && entry.getInstance();
   }

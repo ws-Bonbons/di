@@ -1,4 +1,4 @@
-import { BonbonsDIContainer, BonbonsDIEntry, InjectScope, InjectDIToken, ImplementDIValue } from "@bonbons/contracts";
+import { BonbonsDIContainer, BonbonsDIEntry, InjectScope, InjectDIToken, ImplementDIValue, IBonbonsInjectable } from "@bonbons/contracts";
 declare class DIEntry implements BonbonsDIEntry {
     private scope;
     private _instance;
@@ -8,9 +8,9 @@ declare class DIEntry implements BonbonsDIEntry {
 }
 export declare class DIContainer implements BonbonsDIContainer {
     private deps_queue;
-    protected _pool: Map<InjectDIToken<import("../node_modules/@bonbons/contracts/dist/src/injectable").IBonbonsInjectable>, DIEntry>;
+    protected _pool: Map<InjectDIToken<IBonbonsInjectable>, DIEntry>;
     readonly count: number;
-    get<T>(token: InjectDIToken): T;
+    get<T>(token: InjectDIToken<T>): T;
     register(selector: InjectDIToken, value: ImplementDIValue, scope: InjectScope): void;
     resolveDeps(value: any): {}[];
     complete(): void;
