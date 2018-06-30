@@ -1,18 +1,20 @@
-import { InjectScope } from "@bonbons/contracts";
-import { DependencyQueue } from "./dependency";
-import { invalidOperation, invalidParam, TypeCheck } from "@bonbons/utils";
-import { getDependencies } from "./reflect";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const contracts_1 = require("@bonbons/contracts");
+const dependency_1 = require("./dependency");
+const utils_1 = require("@bonbons/utils");
+const reflect_1 = require("./reflect");
 class DIEntry {
     constructor(scope) {
         this.scope = scope;
     }
     getInstance() {
-        return this.scope === InjectScope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
+        return this.scope === contracts_1.InjectScope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
     }
 }
-export class DIContainer {
+class DIContainer {
     constructor() {
-        this.deps_queue = new DependencyQueue();
+        this.deps_queue = new dependency_1.DependencyQueue();
         this._pool = new Map();
     }
     get count() { return this._pool.size; }
@@ -24,14 +26,14 @@ export class DIContainer {
         if (!value)
             throw serviceError(value);
         const { prototype, __valid } = value;
-        if (prototype && !TypeCheck.isFunction(value) && !prototype.__valid)
+        if (prototype && !utils_1.TypeCheck.isFunction(value) && !prototype.__valid)
             throw serviceError(value);
-        if (!prototype && !TypeCheck.isFunction(value) && !__valid)
+        if (!prototype && !utils_1.TypeCheck.isFunction(value) && !__valid)
             throw serviceError(value);
-        this.deps_queue.addNode({ el: selector, realel: value, deps: getDependencies(value), scope });
+        this.deps_queue.addNode({ el: selector, realel: value, deps: reflect_1.getDependencies(value), scope });
     }
     resolveDeps(value) {
-        return getDependencies(value).map(dep => this.get(dep));
+        return reflect_1.getDependencies(value).map(dep => this.get(dep));
     }
     complete() {
         const finals = this.deps_queue.sort();
@@ -46,16 +48,17 @@ export class DIContainer {
         });
     }
 }
+exports.DIContainer = DIContainer;
 function serviceError(selector) {
-    return invalidParam("Service to be add is invalid. You can only add the service been decorated by @Injectable(...).", {
+    return utils_1.invalidParam("Service to be add is invalid. You can only add the service been decorated by @Injectable(...).", {
         className: selector && selector.name,
         stringfy: selector || {}
     });
 }
 function registerError(selector) {
-    return invalidOperation(`injectable register error : injectable element with name [${(selector && selector.name) || "unknown name"}] is exist already.`);
+    return utils_1.invalidOperation(`injectable register error : injectable element with name [${(selector && selector.name) || "unknown name"}] is exist already.`);
 }
 function resolveError(selector) {
-    return invalidOperation(`resolve injectable dependencies error : can not resolve dept name [${(selector && selector.name) || "unknown name"}] .`);
+    return utils_1.invalidOperation(`resolve injectable dependencies error : can not resolve dept name [${(selector && selector.name) || "unknown name"}] .`);
 }
 //# sourceMappingURL=container.js.map

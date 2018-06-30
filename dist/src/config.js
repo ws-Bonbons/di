@@ -1,4 +1,6 @@
-export class ConfigCollection {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class ConfigCollection {
     constructor() {
         this._pool = new Map();
     }
@@ -13,4 +15,5 @@ export class ConfigCollection {
         return Array.from(this._pool.entries()).map(([sb, { value }]) => ({ token: { key: sb }, value }));
     }
 }
+exports.ConfigCollection = ConfigCollection;
 //# sourceMappingURL=config.js.map

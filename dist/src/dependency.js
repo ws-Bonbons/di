@@ -1,6 +1,8 @@
-import { InjectScope } from "@bonbons/contracts";
-import { invalidOperation, TypeCheck } from "@bonbons/utils";
-export class DependencyQueue {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const contracts_1 = require("@bonbons/contracts");
+const utils_1 = require("@bonbons/utils");
+class DependencyQueue {
     constructor() {
         this.queue = [];
         this.sections = [];
@@ -13,11 +15,11 @@ export class DependencyQueue {
         const registerValue = realel || el;
         const { prototype } = registerValue;
         const isConstructor = !!prototype;
-        const isFactory = TypeCheck.isFunction(registerValue || {});
-        scope = scope || InjectScope.Singleton;
+        const isFactory = utils_1.TypeCheck.isFunction(registerValue || {});
+        scope = scope || contracts_1.InjectScope.Singleton;
         this.queue.push({
             el, realel: registerValue, deps,
-            scope: isConstructor ? scope : InjectScope.Singleton,
+            scope: isConstructor ? scope : contracts_1.InjectScope.Singleton,
             fac: isFactory ? registerValue : null
         });
     }
@@ -36,6 +38,7 @@ export class DependencyQueue {
         this.decideSection(queue.filter(i => !wants.includes(i)), sections, current + 1);
     }
 }
+exports.DependencyQueue = DependencyQueue;
 function resolveUnder(node, sections, checkIndex, sourceQueue) {
     const checkArr = [];
     if (checkIndex < 0)
@@ -51,10 +54,10 @@ function resolveUnder(node, sections, checkIndex, sourceQueue) {
     return isresolved;
 }
 function resolveError(el, depts) {
-    return invalidOperation(`Resolve dependency error : the dependency queue is broken caused by [${(el && el.name) || "unknown name"}]. ` +
+    return utils_1.invalidOperation(`Resolve dependency error : the dependency queue is broken caused by [${(el && el.name) || "unknown name"}]. ` +
         `the depedency list is [${(depts || []).map(i => i.name || "??").join(", ")}]`);
 }
 function duplicateError(el) {
-    return invalidOperation(`register service error : the inject token is duplicate : [${(el && el.name) || "unknown name"}]. `);
+    return utils_1.invalidOperation(`register service error : the inject token is duplicate : [${(el && el.name) || "unknown name"}]. `);
 }
 //# sourceMappingURL=dependency.js.map
