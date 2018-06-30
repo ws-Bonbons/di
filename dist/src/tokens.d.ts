@@ -1,0 +1,13 @@
+import { BonbonsConfigCollection, BonbonsDIContainer, BonbonsTokenGenerator, IStaticTypedResolver, IENV, IDepolyENV, JsonResultOptions, StringResultOptions, JsonFormOptions, URLFormOptions, TextFormOptions, KOABodyParseOptions } from "@bonbons/contracts";
+export declare const createToken: BonbonsTokenGenerator;
+export declare const ENV_MODE: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<IENV>;
+export declare const DEPLOY_MODE: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<IDepolyENV>;
+export declare const CONFIG_COLLECTION: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<BonbonsConfigCollection>;
+export declare const DI_CONTAINER: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<BonbonsDIContainer>;
+export declare const STATIC_TYPED_RESOLVER: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<IStaticTypedResolver>;
+export declare const JSON_RESULT_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<JsonResultOptions>;
+export declare const STRING_RESULT_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<StringResultOptions>;
+export declare const BODY_PARSE_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<KOABodyParseOptions>;
+export declare const JSON_FORM_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<JsonFormOptions>;
+export declare const URL_FORM_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<URLFormOptions>;
+export declare const TEXT_FORM_OPTIONS: import("../node_modules/@bonbons/contracts/dist/src/di").BonbonsToken<TextFormOptions>;
