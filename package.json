@@ -1,0 +1,36 @@
+{
+  "name": "@bonbons/di",
+  "version": "1.0.0",
+  "description": "@bonbons/di",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ws-Bonbons/di.git"
+  },
+  "author": "bws",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ws-Bonbons/di/issues"
+  },
+  "homepage": "https://github.com/ws-Bonbons/di#readme",
+  "dependencies": {
+    "@bonbons/contracts": "^1.0.2",
+    "@bonbons/utils": "^1.0.2",
+    "reflect-metadata": "^0.1.12"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.46",
+    "@types/koa-bodyparser": "^4.2.0",
+    "@types/koa-router": "^7.0.28",
+    "@types/node": "^10.3.2",
+    "ts-loader": "^4.4.1",
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1",
+    "webpack": "^4.12.0",
+    "webpack-cli": "^3.0.3"
+  }
+}
