@@ -1,6 +1,6 @@
 {
   "name": "@bonbons/di",
-  "version": "1.0.5-beta",
+  "version": "1.0.6-beta",
   "description": "@bonbons/di",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,8 +18,8 @@
   },
   "homepage": "https://github.com/ws-Bonbons/di#readme",
   "dependencies": {
-    "@bonbons/contracts": "^1.0.4",
-    "@bonbons/utils": "^1.0.4",
+    "@bonbons/contracts": "^1.0.6-beta",
+    "@bonbons/utils": "^1.0.6-beta",
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
