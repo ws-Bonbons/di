@@ -1,11 +1,12 @@
 {
   "name": "@bonbons/di",
-  "version": "1.0.6-beta",
+  "version": "1.0.7-beta",
   "description": "@bonbons/di",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.config.js"
+    "build": "tsc -project tsconfig.build.json",
+    "build:package": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,7 @@
   },
   "homepage": "https://github.com/ws-Bonbons/di#readme",
   "dependencies": {
-    "@bonbons/contracts": "^1.0.6-beta",
+    "@bonbons/contracts": "^1.0.7-beta",
     "@bonbons/utils": "^1.0.6-beta",
     "reflect-metadata": "^0.1.12"
   },

@@ -1,4 +1,5 @@
 import { BonbonsConfigCollection, BonbonsDIContainer, BonbonsTokenGenerator, BonbonsToken, IStaticTypedResolver, IENV, IDepolyENV, JsonResultOptions, StringResultOptions, JsonFormOptions, URLFormOptions, TextFormOptions, KOABodyParseOptions } from "@bonbons/contracts";
+export { BonbonsToken };
 export declare const createToken: BonbonsTokenGenerator;
 export declare const ENV_MODE: BonbonsToken<IENV>;
 export declare const DEPLOY_MODE: BonbonsToken<IDepolyENV>;

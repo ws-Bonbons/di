@@ -14,6 +14,8 @@ import {
   KOABodyParseOptions
 } from "@bonbons/contracts";
 
+export { BonbonsToken };
+
 export const createToken: BonbonsTokenGenerator = (key: string) => ({ key: Symbol(`BONBONS-KOA2-TOKEN:${key}`) });
 
 export const ENV_MODE: BonbonsToken<IENV> = createToken<IENV>("ENV_MODE");
