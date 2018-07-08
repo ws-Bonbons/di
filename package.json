@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/ws-Bonbons/di#readme",
   "dependencies": {
-    "@bonbons/contracts": "^1.0.7-beta",
-    "@bonbons/utils": "^1.0.6-beta",
+    "@bonbons/contracts": "latest",
+    "@bonbons/utils": "latest",
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
