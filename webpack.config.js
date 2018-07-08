@@ -13,7 +13,7 @@ module.exports = {
     library: '@bonbons/di',
     libraryTarget: 'umd'
   },
-  mode: "production",
+  mode: "development",
   resolve: {
     modules: ["node_modules"],
     extensions: [".js", ".ts"]
