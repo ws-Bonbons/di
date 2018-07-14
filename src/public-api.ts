@@ -1,4 +1,4 @@
-export * from "./tokens";
+export * from "./di/tokens";
 import { Contracts } from "@bonbons/contracts";
 
 export type ConfigsCollection = Contracts.ConfigsCollection;
