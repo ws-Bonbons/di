@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import {
-  PARAMS_META_KEY,
-  CTOR_META_KEY,
-  PIPE_META_KEY,
+  Contracts as api,
   IBonbonsControllerMetadata,
   IBonbonsPipeMetadata
 } from "@bonbons/contracts";
+
+const { PARAMS_META_KEY, CTOR_META_KEY, PIPE_META_KEY } = api;
 
 export function getDependencies(target): any[] {
   return Reflect.getMetadata(PARAMS_META_KEY, target) || [];

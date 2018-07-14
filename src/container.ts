@@ -1,39 +1,40 @@
-import {
-  BonbonsDIContainer,
-  BonbonsDIEntry,
-  InjectScope,
-  InjectDIToken,
-  ImplementToken,
-  ImplementDIValue,
-  IConstructor,
-  IBonbonsInjectable
-} from "@bonbons/contracts";
+import { IConstructor, Contracts as api } from "@bonbons/contracts";
 import { DependencyQueue } from "./dependency";
 import { invalidOperation, invalidParam, TypeCheck } from "@bonbons/utils";
 import { getDependencies } from "./reflect";
 
-class DIEntry implements BonbonsDIEntry {
+export type Scope = api.InjectScope;
+
+const { InjectScope: Scope } = api;
+type Entry = api.BonbonsDIEntry;
+type Container = api.BonbonsDIContainer;
+type IJTToken<T = any> = api.InjectDIToken<T>;
+type IJT = api.IBonbonsInjectable;
+type IMPValue = api.ImplementDIValue;
+type IMPToken<T = any> = api.ImplementToken<T>;
+
+class DIEntry implements Entry {
   private _instance: any;
   private _fac?: any;
-  constructor(private scope: InjectScope) { }
+  constructor(private scope: Scope) { }
   getInstance() {
-    return this.scope === InjectScope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
+    return this.scope === Scope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
   }
 }
 
-export class DIContainer implements BonbonsDIContainer {
+export class DIContainer implements Container {
 
   private deps_queue = new DependencyQueue();
-  protected _pool = new Map<InjectDIToken<IBonbonsInjectable>, DIEntry>();
+  protected _pool = new Map<IJTToken<IJT>, DIEntry>();
 
   public get count() { return this._pool.size; }
 
-  public get<T>(token: InjectDIToken<T>): T {
+  public get<T>(token: IJTToken<T>): T {
     const entry = this._pool.get(token);
     return entry && entry.getInstance();
   }
 
-  public register(selector: InjectDIToken, value: ImplementDIValue, scope: InjectScope) {
+  public register(selector: IJTToken, value: IMPValue, scope: Scope) {
     if (!value) throw serviceError(value);
     const { prototype, __valid } = <any>value;
     if (prototype && !TypeCheck.isFunction(value) && !prototype.__valid) throw serviceError(value);
@@ -51,7 +52,7 @@ export class DIContainer implements BonbonsDIContainer {
       const exist = this._pool.get(el);
       if (exist) throw registerError(el);
       const entry = new DIEntry(scope);
-      const isConstructor = !!(<ImplementToken<any>>realel).prototype;
+      const isConstructor = !!(<IMPToken<any>>realel).prototype;
       (<any>entry)._fac = fac || (() => (isConstructor ? new (<IConstructor<any>>realel)(...deps.map(dep => this.get(dep))) : realel));
       this._pool.set(el, entry);
     });

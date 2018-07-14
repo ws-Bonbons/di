@@ -1,12 +1,15 @@
-import { InjectScope, BonbonsDeptNode } from "@bonbons/contracts";
+import { Contracts as api } from "@bonbons/contracts";
 import { invalidOperation, TypeCheck } from "@bonbons/utils";
+
+const { InjectScope } = api;
+type DeptNode = api.BonbonsDeptNode;
 
 export class DependencyQueue {
 
-  private queue: BonbonsDeptNode[] = [];
-  private sections: Array<BonbonsDeptNode[]> = [];
+  private queue: DeptNode[] = [];
+  private sections: Array<DeptNode[]> = [];
 
-  public addNode({ el, realel, scope, deps }: BonbonsDeptNode) {
+  public addNode({ el, realel, scope, deps }: DeptNode) {
     const found = this.queue.find(i => i.el === el);
     if (found) throw duplicateError(el);
     deps = deps || [];
@@ -22,13 +25,13 @@ export class DependencyQueue {
     });
   }
 
-  public sort(): BonbonsDeptNode[] {
+  public sort(): DeptNode[] {
     this.sections[0] = this.queue.filter(i => i.deps.length === 0);
     this.decideSection(this.queue.filter(i => i.deps.length > 0), this.sections, 1);
     return this.sections.reduce((pre, cur, idx, arr) => ([...pre, ...cur]));
   }
 
-  private decideSection(queue: BonbonsDeptNode[], sections: Array<BonbonsDeptNode[]>, current: number) {
+  private decideSection(queue: DeptNode[], sections: Array<DeptNode[]>, current: number) {
     if (queue.length === 0) return;
     const wants = queue.filter(item => resolveUnder(item, sections, current - 1, this.queue));
     if (wants.length === 0) return;
@@ -38,8 +41,8 @@ export class DependencyQueue {
 
 }
 
-function resolveUnder(node: BonbonsDeptNode, sections: Array<BonbonsDeptNode[]>, checkIndex: number, sourceQueue: BonbonsDeptNode[]) {
-  const checkArr: BonbonsDeptNode[] = [];
+function resolveUnder(node: DeptNode, sections: Array<DeptNode[]>, checkIndex: number, sourceQueue: DeptNode[]) {
+  const checkArr: DeptNode[] = [];
   if (checkIndex < 0) return false;
   let index = checkIndex;
   while (index >= 0) {

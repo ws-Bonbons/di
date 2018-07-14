@@ -1,19 +1,22 @@
-import { BonbonsConfigCollection, BonbonsEntry, BonbonsToken } from "@bonbons/contracts";
+import { Contracts as api } from "@bonbons/contracts";
 
-export class ConfigCollection implements BonbonsConfigCollection {
+type Configs = api.BonbonsConfigCollection;
+type Token<T> = api.BonbonsToken<T>;
+
+export class ConfigCollection implements Configs {
 
   protected _pool = new Map<symbol, { value: any }>();
 
-  public set<T>(token: BonbonsToken<T>, entry: T): void {
+  public set<T>(token: Token<T>, entry: T): void {
     this._pool.set(token.key, { value: entry });
   }
 
-  public get<T>(token: BonbonsToken<T>): T {
+  public get<T>(token: Token<T>): T {
     const entry = this._pool.get(token.key);
     return entry && entry.value;
   }
 
-  public toArray(): BonbonsEntry<any>[] {
+  public toArray(): api.BonbonsEntry<any>[] {
     return Array.from(this._pool.entries()).map(([sb, { value }]) => ({ token: { key: sb }, value }));
   }
 
