@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const contracts_1 = require("@bonbons/contracts");
 const utils_1 = require("@bonbons/utils");
+const { InjectScope } = contracts_1.Contracts;
 class DependencyQueue {
     constructor() {
         this.queue = [];
@@ -16,10 +17,10 @@ class DependencyQueue {
         const { prototype } = registerValue;
         const isConstructor = !!prototype;
         const isFactory = utils_1.TypeCheck.isFunction(registerValue || {});
-        scope = scope || contracts_1.InjectScope.Singleton;
+        scope = scope || InjectScope.Singleton;
         this.queue.push({
             el, realel: registerValue, deps,
-            scope: isConstructor ? scope : contracts_1.InjectScope.Singleton,
+            scope: isConstructor ? scope : InjectScope.Singleton,
             fac: isFactory ? registerValue : null
         });
     }

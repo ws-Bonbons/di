@@ -1,17 +1,22 @@
-import { BonbonsDIContainer, BonbonsDIEntry, InjectScope, InjectDIToken, ImplementDIValue, IBonbonsInjectable } from "@bonbons/contracts";
-declare class DIEntry implements BonbonsDIEntry {
+import { Contracts as api } from "@bonbons/contracts";
+export declare type Scope = api.InjectScope;
+declare type Entry = api.BonbonsDIEntry;
+declare type Container = api.BonbonsDIContainer;
+declare type IJTToken<T = any> = api.InjectDIToken<T>;
+declare type IMPValue = api.ImplementDIValue;
+declare class DIEntry implements Entry {
     private scope;
     private _instance;
     private _fac?;
-    constructor(scope: InjectScope);
+    constructor(scope: Scope);
     getInstance(): any;
 }
-export declare class DIContainer implements BonbonsDIContainer {
+export declare class DIContainer implements Container {
     private deps_queue;
-    protected _pool: Map<InjectDIToken<IBonbonsInjectable>, DIEntry>;
+    protected _pool: Map<api.InjectDIToken<api.IBonbonsInjectable>, DIEntry>;
     readonly count: number;
-    get<T>(token: InjectDIToken<T>): T;
-    register(selector: InjectDIToken, value: ImplementDIValue, scope: InjectScope): void;
+    get<T>(token: IJTToken<T>): T;
+    register(selector: IJTToken, value: IMPValue, scope: Scope): void;
     resolveDeps(value: any): {}[];
     complete(): void;
 }

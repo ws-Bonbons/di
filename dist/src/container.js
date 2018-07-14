@@ -4,12 +4,13 @@ const contracts_1 = require("@bonbons/contracts");
 const dependency_1 = require("./dependency");
 const utils_1 = require("@bonbons/utils");
 const reflect_1 = require("./reflect");
+const { InjectScope: Scope } = contracts_1.Contracts;
 class DIEntry {
     constructor(scope) {
         this.scope = scope;
     }
     getInstance() {
-        return this.scope === contracts_1.InjectScope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
+        return this.scope === Scope.Singleton ? (this._instance || (this._instance = this._fac())) : this._fac();
     }
 }
 class DIContainer {

@@ -1,9 +1,12 @@
-import { BonbonsConfigCollection, BonbonsEntry, BonbonsToken } from "@bonbons/contracts";
-export declare class ConfigCollection implements BonbonsConfigCollection {
+import { Contracts as api } from "@bonbons/contracts";
+declare type Configs = api.BonbonsConfigCollection;
+declare type Token<T> = api.BonbonsToken<T>;
+export declare class ConfigCollection implements Configs {
     protected _pool: Map<symbol, {
         value: any;
     }>;
-    set<T>(token: BonbonsToken<T>, entry: T): void;
-    get<T>(token: BonbonsToken<T>): T;
-    toArray(): BonbonsEntry<any>[];
+    set<T>(token: Token<T>, entry: T): void;
+    get<T>(token: Token<T>): T;
+    toArray(): api.BonbonsEntry<any>[];
 }
+export {};
