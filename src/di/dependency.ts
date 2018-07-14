@@ -1,8 +1,8 @@
-import { Contracts as api } from "@bonbons/contracts";
+import { Contracts as c } from "@bonbons/contracts";
 import { invalidOperation, TypeCheck } from "@bonbons/utils";
 
-const { InjectScope } = api;
-type DeptNode = api.BonbonsDeptNode;
+const { InjectScope } = c;
+type DeptNode = c.BonbonsDeptNode;
 
 export class DependencyQueue {
 

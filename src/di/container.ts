@@ -1,17 +1,17 @@
-import { IConstructor, Contracts as api } from "@bonbons/contracts";
+import { Constructor, Contracts as c } from "@bonbons/contracts";
 import { DependencyQueue } from "./dependency";
 import { invalidOperation, invalidParam, TypeCheck } from "@bonbons/utils";
 import { getDependencies } from "./reflect";
 
-export type Scope = api.InjectScope;
+export type Scope = c.InjectScope;
 
-const { InjectScope: Scope } = api;
-type Entry = api.BonbonsDIEntry;
-type Container = api.BonbonsDIContainer;
-type IJTToken<T = any> = api.InjectDIToken<T>;
-type IJT = api.IBonbonsInjectable;
-type IMPValue = api.ImplementDIValue;
-type IMPToken<T = any> = api.ImplementToken<T>;
+const { InjectScope: Scope } = c;
+type Entry = c.BonbonsDIEntry;
+type Container = c.BonbonsDIContainer;
+type IJTToken<T = any> = c.InjectDIToken<T>;
+type IJT = c.IBonbonsInjectable;
+type IMPValue = c.ImplementDIValue;
+type IMPToken<T = any> = c.ImplementToken<T>;
 
 class DIEntry implements Entry {
   private _instance: any;
@@ -53,7 +53,7 @@ export class DIContainer implements Container {
       if (exist) throw registerError(el);
       const entry = new DIEntry(scope);
       const isConstructor = !!(<IMPToken<any>>realel).prototype;
-      (<any>entry)._fac = fac || (() => (isConstructor ? new (<IConstructor<any>>realel)(...deps.map(dep => this.get(dep))) : realel));
+      (<any>entry)._fac = fac || (() => (isConstructor ? new (<Constructor<any>>realel)(...deps.map(dep => this.get(dep))) : realel));
       this._pool.set(el, entry);
     });
   }

@@ -1,7 +1,7 @@
-import { Contracts as api } from "@bonbons/contracts";
+import { Contracts as c } from "@bonbons/contracts";
 
-type Configs = api.BonbonsConfigCollection;
-type Token<T> = api.BonbonsToken<T>;
+type Configs = c.BonbonsConfigCollection;
+type Token<T> = c.BonbonsToken<T>;
 
 export class ConfigCollection implements Configs {
 
@@ -16,7 +16,7 @@ export class ConfigCollection implements Configs {
     return entry && entry.value;
   }
 
-  public toArray(): api.BonbonsEntry<any>[] {
+  public toArray(): c.BonbonsEntry<any>[] {
     return Array.from(this._pool.entries()).map(([sb, { value }]) => ({ token: { key: sb }, value }));
   }
 

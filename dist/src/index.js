@@ -17,5 +17,5 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./public-api"));
 const PrivateAPI = __importStar(require("./private-api"));
-exports.PrivateAPI = PrivateAPI;
+exports.PrivateDI = PrivateAPI;
 //# sourceMappingURL=index.js.map
