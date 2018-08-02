@@ -188,7 +188,7 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
           if (!scopeId) return fac();
           const pool = this.scopePools.get(<ScopeID>scopeId);
           if (!pool) {
-            const instance = fac();
+            const instance = fac(scopeId);
             const newPool = new DIScopePool();
             newPool.setInstance(token, instance);
             this.scopePools.set(<string>scopeId, newPool);
@@ -196,7 +196,7 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
           } else {
             const poolInstance = pool.getInstance(token);
             if (poolInstance === undefined) {
-              const instance = fac();
+              const instance = fac(scopeId);
               pool.setInstance(token, instance);
               return instance;
             } else {
