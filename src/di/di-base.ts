@@ -83,7 +83,6 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
    * @memberof DIContainer
    */
   public getConfig() {
-    console.log(this.map);
     return this.sorted.map(i => ({
       contract: i.token && (<any>i.token).name,
       implement: (i.imp && (<any>i.imp.name)) || "[factory or instance]",
