@@ -182,7 +182,7 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
   private scopeMark<T>(item: DIContainerEntry<T>, fac: ImplementFactory<T>): Nullable<(scopeId?: ScopeID) => T | null> {
     const { scope, token } = item;
     switch (scope) {
-      case InjectScope.New:
+      case InjectScope.New: return fac;
       case InjectScope.Scope: // 实现范围模式
         return (scopeId?: ScopeID) => {
           if (!scopeId) return fac();
