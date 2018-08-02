@@ -99,11 +99,12 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
    * @author Big Mogician
    * @template T
    * @param {InjectToken[]} depts
+   * @param {ScopeID} scopeId
    * @returns
    * @memberof DIContainer
    */
-  public getDepedencies<T>(depts: InjectToken[]) {
-    return depts.length === 0 ? [] : depts.map(i => this.get(i));
+  public getDepedencies<T>(depts: InjectToken[], scopeId?: ScopeID) {
+    return depts.length === 0 ? [] : depts.map(i => this.get(i, scopeId));
   }
 
   /**
