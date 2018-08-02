@@ -11,7 +11,7 @@ export declare abstract class BaseDIContainer implements BonbonsDIContainer {
      * @protected
      * @memberof DIContainer
      */
-    protected scopePools: Map<import("../../../../../../../../Users/bigmogician/Documents/github.com/@Bonbons/di/node_modules/@bonbons/contracts/dist/src/contracts/base").ScopeID, DIScopePool>;
+    protected scopePools: Map<ScopeID, DIScopePool>;
     abstract register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
     abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
     /**

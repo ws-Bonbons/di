@@ -28,7 +28,7 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
    * @protected
    * @memberof DIContainer
    */
-  protected scopePools = new Map<ScopeID, DIScopePool>();
+  protected scopePools: Map<ScopeID, DIScopePool> = new Map<ScopeID, DIScopePool>();
 
   public abstract register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
   public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
