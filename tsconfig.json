@@ -8,6 +8,9 @@
       ],
       "@bonbons/contracts": [
         "./../contracts/index.ts"
+      ],
+      "@bonbons/contracts/dist/src/private-api": [
+        "./../contracts/dist/src/private-api.ts"
       ]
     }
   }

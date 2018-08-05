@@ -1,9 +1,8 @@
 import { BaseDIContainer } from "./di-base";
 import { Implement, InjectScope, InjectToken, DIContainerEntry } from "./declares";
 import { getDependencies } from "./reflect";
-import { Contracts as c } from "@bonbons/contracts";
 
-export type Scope = c.InjectScope;
+export type Scope = InjectScope;
 
 export class DIContainer extends BaseDIContainer {
 
