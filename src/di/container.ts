@@ -1,6 +1,7 @@
 import { BaseDIContainer } from "./di-base";
 import { Implement, InjectScope, InjectToken, DIContainerEntry } from "./declares";
 import { getDependencies } from "./reflect";
+import { ScopeID } from "@bonbons/contracts/dist/src/private-api";
 
 export type Scope = InjectScope;
 
@@ -16,9 +17,9 @@ export class DIContainer extends BaseDIContainer {
   }
 
   public createFactory<T>(item: DIContainerEntry<T>) {
-    const { token, imp, scope, depts } = item;
+    const { imp, depts } = item;
     if (!item.fac) {
-      item.fac = () => new (imp)(...this.getDepedencies(depts));
+      item.fac = (scopeId?: ScopeID) => new (imp)(...this.getDepedencies(depts, scopeId));
     }
     return item.fac;
   }

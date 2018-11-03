@@ -12,9 +12,9 @@ class DIContainer extends di_base_1.BaseDIContainer {
         });
     }
     createFactory(item) {
-        const { token, imp, scope, depts } = item;
+        const { imp, depts } = item;
         if (!item.fac) {
-            item.fac = () => new (imp)(...this.getDepedencies(depts));
+            item.fac = (scopeId) => new (imp)(...this.getDepedencies(depts, scopeId));
         }
         return item.fac;
     }
