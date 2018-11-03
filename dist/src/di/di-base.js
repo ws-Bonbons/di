@@ -36,6 +36,11 @@ class BaseDIContainer {
     complete() {
         this.resolve();
     }
+    dispose(scopeId) {
+        if (scopeId) {
+            this.scopePools.set(scopeId, undefined);
+        }
+    }
     /**
      * 解析单个token
      * @description

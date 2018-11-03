@@ -59,6 +59,12 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
     this.resolve();
   }
 
+  public dispose(scopeId?: ScopeID) {
+    if (scopeId) {
+      this.scopePools.set(scopeId, undefined);
+    }
+  }
+
   /**
    * 解析单个token
    * @description
