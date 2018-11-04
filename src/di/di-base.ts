@@ -59,8 +59,14 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
     this.resolve();
   }
 
+  public createScope(scopeId: ScopeID, metadata: any) {
+    this.scopePools.set(scopeId, new DIScopePool({ ...metadata }));
+  }
+
   public dispose(scopeId?: ScopeID) {
     if (scopeId) {
+      const pool = this.scopePools.get(scopeId);
+      if (pool) pool.dispose();
       this.scopePools.set(scopeId, undefined);
     }
   }
@@ -194,15 +200,15 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
           if (!scopeId) return fac();
           const pool = this.scopePools.get(<ScopeID>scopeId);
           if (!pool) {
-            const instance = fac(scopeId);
-            const newPool = new DIScopePool();
+            const instance = fac(scopeId, {});
+            const newPool = new DIScopePool({});
             newPool.setInstance(token, instance);
             this.scopePools.set(<string>scopeId, newPool);
             return <T>instance;
           } else {
             const poolInstance = pool.getInstance(token);
             if (poolInstance === undefined) {
-              const instance = fac(scopeId);
+              const instance = fac(scopeId, pool.metadata);
               pool.setInstance(token, instance);
               return instance;
             } else {

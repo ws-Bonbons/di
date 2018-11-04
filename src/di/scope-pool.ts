@@ -1,8 +1,13 @@
 import { InjectToken } from "./declares";
+import { KOAContext } from "@bonbons/contracts/dist/src/private-api";
 
 export class DIScopePool {
 
   private instanceMap = new Map<InjectToken, any>();
+
+  constructor(private scopeMetadata: { ctx?: KOAContext }) { }
+
+  public get metadata() { return this.scopeMetadata; }
 
   setInstance<T>(token: InjectToken<T>, instance: T): void {
     this.instanceMap.set(token, instance || null);
@@ -30,7 +35,8 @@ export class DIScopePool {
   }
 
   dispose() {
-
+    this.scopeMetadata = undefined;
+    this.instanceMap = undefined;
   }
 
 }

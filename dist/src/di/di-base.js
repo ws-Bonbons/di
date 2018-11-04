@@ -36,8 +36,14 @@ class BaseDIContainer {
     complete() {
         this.resolve();
     }
+    createScope(scopeId, metadata) {
+        this.scopePools.set(scopeId, new scope_pool_1.DIScopePool(Object.assign({}, metadata)));
+    }
     dispose(scopeId) {
         if (scopeId) {
+            const pool = this.scopePools.get(scopeId);
+            if (pool)
+                pool.dispose();
             this.scopePools.set(scopeId, undefined);
         }
     }
@@ -167,8 +173,8 @@ class BaseDIContainer {
                         return fac();
                     const pool = this.scopePools.get(scopeId);
                     if (!pool) {
-                        const instance = fac(scopeId);
-                        const newPool = new scope_pool_1.DIScopePool();
+                        const instance = fac(scopeId, {});
+                        const newPool = new scope_pool_1.DIScopePool({});
                         newPool.setInstance(token, instance);
                         this.scopePools.set(scopeId, newPool);
                         return instance;
@@ -176,7 +182,7 @@ class BaseDIContainer {
                     else {
                         const poolInstance = pool.getInstance(token);
                         if (poolInstance === undefined) {
-                            const instance = fac(scopeId);
+                            const instance = fac(scopeId, pool.metadata);
                             pool.setInstance(token, instance);
                             return instance;
                         }

@@ -26,6 +26,7 @@ export declare abstract class BaseDIContainer implements BonbonsDIContainer {
      */
     protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>): void;
     complete(): void;
+    createScope(scopeId: ScopeID, metadata: any): void;
     dispose(scopeId?: ScopeID): void;
     /**
      * 解析单个token

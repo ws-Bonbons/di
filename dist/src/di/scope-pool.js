@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class DIScopePool {
-    constructor() {
+    constructor(scopeMetadata) {
+        this.scopeMetadata = scopeMetadata;
         this.instanceMap = new Map();
     }
+    get metadata() { return this.scopeMetadata; }
     setInstance(token, instance) {
         this.instanceMap.set(token, instance || null);
     }
@@ -26,6 +28,8 @@ class DIScopePool {
         }
     }
     dispose() {
+        this.scopeMetadata = undefined;
+        this.instanceMap = undefined;
     }
 }
 exports.DIScopePool = DIScopePool;
