@@ -15,7 +15,7 @@ function setColor(name, value) {
 }
 exports.setColor = setColor;
 function isFunction(target) {
-    return Object.prototype.toString.call(target) === "[object Function]";
+    return Object.prototype.toString.call(target) === "[object Function]" && !target.prototype && target !== Object;
 }
 exports.isFunction = isFunction;
 //# sourceMappingURL=utils.js.map
