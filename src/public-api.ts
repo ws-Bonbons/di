@@ -1,5 +1,6 @@
-export * from "./di/tokens";
-import * as Contracts from "@bonbons/contracts/dist/src/private-api";
-
-export type ConfigsCollection = Contracts.ConfigsCollection;
-export type DIContainer = Contracts.ReadonlyDIContainer;
+import { ConfigsCollection, ReadonlyDIContainer } from "./core/declares";
+export * from "./core/declares";
+export {
+  ConfigsCollection,
+  ReadonlyDIContainer as DIContainer
+};

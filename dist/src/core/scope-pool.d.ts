@@ -1,15 +1,12 @@
-/// <reference types="koa" />
-/// <reference types="koa-router" />
 import { InjectToken } from "./declares";
-import { KOAContext } from "@bonbons/contracts/dist/src/private-api";
-export declare class DIScopePool {
+export declare class DIScopePool<T = any> {
     private scopeMetadata;
     private instanceMap;
     constructor(scopeMetadata: {
-        ctx?: KOAContext;
+        ctx?: T;
     });
     readonly metadata: {
-        ctx?: KOAContext;
+        ctx?: T;
     };
     setInstance<T>(token: InjectToken<T>, instance: T): void;
     getInstance<T>(token: InjectToken<T>): T | null | undefined;

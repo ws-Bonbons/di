@@ -7,14 +7,14 @@ import {
   ScopeID,
   DIContainerEntry,
   DepedencyResolveEntry,
-  BonbonsDIContainer,
+  IDIContainer,
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
-import { TypeCheck, setColor } from "@bonbons/utils";
+import { isFunction, setColor } from "../utils";
 
 type DeptNode = DIContainerEntry<any>;
 
-export abstract class BaseDIContainer implements BonbonsDIContainer {
+export abstract class BaseDIContainer implements IDIContainer {
 
   private sections: Array<DeptNode[]> = [];
   private map = new Map<any, DeptNode>();
@@ -45,7 +45,7 @@ export abstract class BaseDIContainer implements BonbonsDIContainer {
    */
   protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>) {
     const { imp } = entry;
-    const isFactory = TypeCheck.isFunction(imp || {});
+    const isFactory = isFunction(imp || {});
     const isConstructor = !!((<any>imp).prototype);
     this.map.set(token, {
       ...entry,

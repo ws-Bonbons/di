@@ -1,7 +1,7 @@
-import { BonbonsConfigCollection, BonbonsToken, BonbonsEntry } from "@bonbons/contracts/dist/src/private-api";
+import { IConfigCollection, IToken, IEntry } from "./declares";
 
-type Configs = BonbonsConfigCollection;
-type Token<T> = BonbonsToken<T>;
+type Configs = IConfigCollection;
+type Token<T> = IToken<T>;
 
 export class ConfigCollection implements Configs {
 
@@ -16,7 +16,7 @@ export class ConfigCollection implements Configs {
     return entry && entry.value;
   }
 
-  public toArray(): BonbonsEntry<any>[] {
+  public toArray(): IEntry<any>[] {
     return Array.from(this._pool.entries()).map(([sb, { value }]) => ({ token: { key: sb }, value }));
   }
 

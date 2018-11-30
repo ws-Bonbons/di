@@ -1,6 +1,6 @@
-import { InjectScope, InjectToken, Implement, ImplementFactory, ScopeID, DIContainerEntry, DepedencyResolveEntry, BonbonsDIContainer } from "./declares";
+import { InjectScope, InjectToken, Implement, ImplementFactory, ScopeID, DIContainerEntry, DepedencyResolveEntry, IDIContainer } from "./declares";
 import { DIScopePool } from "./scope-pool";
-export declare abstract class BaseDIContainer implements BonbonsDIContainer {
+export declare abstract class BaseDIContainer implements IDIContainer {
     private sections;
     private map;
     private sorted;

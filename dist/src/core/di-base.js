@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const declares_1 = require("./declares");
 const scope_pool_1 = require("./scope-pool");
-const utils_1 = require("@bonbons/utils");
+const utils_1 = require("../utils");
 class BaseDIContainer {
     constructor() {
         this.sections = [];
@@ -29,7 +29,7 @@ class BaseDIContainer {
      */
     set(token, entry) {
         const { imp } = entry;
-        const isFactory = utils_1.TypeCheck.isFunction(imp || {});
+        const isFactory = utils_1.isFunction(imp || {});
         const isConstructor = !!(imp.prototype);
         this.map.set(token, Object.assign({}, entry, { fac: isFactory ? imp : !isConstructor ? () => imp : null, getInstance: null, level: -1 }));
     }

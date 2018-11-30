@@ -1,7 +1,14 @@
+import "reflect-metadata";
 import { BaseDIContainer } from "./di-base";
-import { Implement, InjectScope, InjectToken, DIContainerEntry } from "./declares";
-import { getDependencies } from "./reflect";
-import { ScopeID } from "@bonbons/contracts/dist/src/private-api";
+import {
+  Implement, InjectScope,
+  InjectToken, DIContainerEntry,
+  ScopeID, PARAMS_META_KEY
+} from "./declares";
+
+export function getDependencies(target): any[] {
+  return Reflect.getMetadata(PARAMS_META_KEY, target) || [];
+}
 
 export type Scope = InjectScope;
 

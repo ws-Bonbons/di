@@ -1,4 +1,4 @@
 sync:
 	rm -rf dist
-	npm update
-	npm run build
+	yarn upgrade
+	yarn run build

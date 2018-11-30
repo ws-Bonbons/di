@@ -1,11 +1,10 @@
 import { InjectToken } from "./declares";
-import { KOAContext } from "@bonbons/contracts/dist/src/private-api";
 
-export class DIScopePool {
+export class DIScopePool<T = any> {
 
   private instanceMap = new Map<InjectToken, any>();
 
-  constructor(private scopeMetadata: { ctx?: KOAContext }) { }
+  constructor(private scopeMetadata: { ctx?: T }) { }
 
   public get metadata() { return this.scopeMetadata; }
 
