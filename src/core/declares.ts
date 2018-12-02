@@ -149,3 +149,12 @@ export interface IEntry<T> {
   token: IToken<T>;
   value: T;
 }
+
+export interface IContainerConfigs {
+  type: "native" | "proxy";
+}
+
+export interface IProxyBundle<T = any> {
+  init: boolean;
+  source: T;
+}

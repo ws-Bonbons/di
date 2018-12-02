@@ -8,6 +8,8 @@ import {
   DIContainerEntry,
   DepedencyResolveEntry,
   IDIContainer,
+  IContainerConfigs,
+  IProxyBundle,
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
@@ -19,6 +21,10 @@ export abstract class BaseDIContainer implements IDIContainer {
   private sections: Array<DeptNode[]> = [];
   private map = new Map<any, DeptNode>();
   private sorted: DeptNode[] = [];
+
+  private configs: IContainerConfigs = {
+    type: "native"
+  };
 
   public get count(): number { return this.sorted.length; }
 
@@ -32,6 +38,10 @@ export abstract class BaseDIContainer implements IDIContainer {
 
   public abstract register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
   public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
+
+  constructor(configs?: Partial<IContainerConfigs>) {
+    this.configs = { ...this.configs, ...(configs || {}) };
+  }
 
   /**
    * 添加一个token-实现映射
@@ -193,14 +203,17 @@ export abstract class BaseDIContainer implements IDIContainer {
    */
   private scopeMark<T>(item: DIContainerEntry<T>, fac: ImplementFactory<T>): Nullable<(scopeId?: ScopeID) => T | null> {
     const { scope, token } = item;
+    const useProxy = this.configs.type === "proxy";
     switch (scope) {
       case InjectScope.New: return fac;
       case InjectScope.Scope: // 实现范围模式
         return (scopeId?: ScopeID) => {
-          if (!scopeId) return fac();
+          if (!scopeId) return useProxy ? createProxyInstance(fac) : fac();
           const pool = this.scopePools.get(<ScopeID>scopeId);
           if (!pool) {
-            const instance = fac(scopeId, {});
+            const instance = useProxy ?
+              createProxyInstance(() => fac(scopeId, {})) :
+              fac(scopeId, {});
             const newPool = new DIScopePool({});
             newPool.setInstance(token, instance);
             this.scopePools.set(<string>scopeId, newPool);
@@ -208,7 +221,9 @@ export abstract class BaseDIContainer implements IDIContainer {
           } else {
             const poolInstance = pool.getInstance(token);
             if (poolInstance === undefined) {
-              const instance = fac(scopeId, pool.metadata);
+              const instance = useProxy ?
+                createProxyInstance(() => fac(scopeId, pool.metadata)) :
+                fac(scopeId, pool.metadata);
               pool.setInstance(token, instance);
               return instance;
             } else {
@@ -227,6 +242,35 @@ export abstract class BaseDIContainer implements IDIContainer {
     }
   }
 
+}
+
+/**
+ * 用Proxy的方式创建对象instance
+ * @description
+ * @author Big Mogician
+ * @template T
+ * @param {() => T} fac
+ * @returns {T}
+ */
+function createProxyInstance<T>(fac: () => T): T {
+  const proxy: IProxyBundle = { init: false, source: undefined };
+  return new Proxy(<any>proxy, {
+    get(target: IProxyBundle<T>, p) {
+      if (!target.init) {
+        target.source = fac();
+        target.init = true;
+      }
+      return target.source[p];
+    },
+    set(target: IProxyBundle<T>, p, v) {
+      if (!target.init) {
+        target.source = fac();
+        target.init = true;
+      }
+      target.source[p] = v;
+      return true;
+    }
+  });
 }
 
 /**
