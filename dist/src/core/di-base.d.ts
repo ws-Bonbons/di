@@ -27,6 +27,7 @@ export declare abstract class BaseDIContainer implements IDIContainer {
      * @memberof DIContainer
      */
     protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>): void;
+    resetConfigs(configs: Partial<IContainerConfigs>): this;
     complete(): void;
     createScope(scopeId: ScopeID, metadata: any): void;
     dispose(scopeId?: ScopeID): void;

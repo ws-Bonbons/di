@@ -40,7 +40,7 @@ export abstract class BaseDIContainer implements IDIContainer {
   public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
 
   constructor(configs?: Partial<IContainerConfigs>) {
-    this.configs = { ...this.configs, ...(configs || {}) };
+    this.resetConfigs(configs || {});
   }
 
   /**
@@ -63,6 +63,11 @@ export abstract class BaseDIContainer implements IDIContainer {
       getInstance: null,
       level: -1
     });
+  }
+
+  public resetConfigs(configs: Partial<IContainerConfigs>) {
+    this.configs = { ...this.configs, ...(configs || {}) };
+    return this;
   }
 
   public complete(): void {

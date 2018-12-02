@@ -18,7 +18,7 @@ class BaseDIContainer {
          * @memberof DIContainer
          */
         this.scopePools = new Map();
-        this.configs = Object.assign({}, this.configs, (configs || {}));
+        this.resetConfigs(configs || {});
     }
     get count() { return this.sorted.length; }
     /**
@@ -36,6 +36,10 @@ class BaseDIContainer {
         const isFactory = utils_1.isFunction(imp || {});
         const isConstructor = !!(imp.prototype);
         this.map.set(token, Object.assign({}, entry, { fac: isFactory ? imp : !isConstructor ? () => imp : null, getInstance: null, level: -1 }));
+    }
+    resetConfigs(configs) {
+        this.configs = Object.assign({}, this.configs, (configs || {}));
+        return this;
     }
     complete() {
         this.resolve();
