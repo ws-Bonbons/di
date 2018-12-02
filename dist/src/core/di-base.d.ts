@@ -1,9 +1,10 @@
-import { InjectScope, InjectToken, Implement, ImplementFactory, ScopeID, DIContainerEntry, DepedencyResolveEntry, IDIContainer } from "./declares";
+import { InjectScope, InjectToken, Implement, ImplementFactory, ScopeID, DIContainerEntry, DepedencyResolveEntry, IDIContainer, IContainerConfigs } from "./declares";
 import { DIScopePool } from "./scope-pool";
 export declare abstract class BaseDIContainer implements IDIContainer {
     private sections;
     private map;
     private sorted;
+    private configs;
     readonly count: number;
     /**
      * 变量池，用来实现范围模式
@@ -14,6 +15,7 @@ export declare abstract class BaseDIContainer implements IDIContainer {
     protected scopePools: Map<ScopeID, DIScopePool>;
     abstract register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
     abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
+    constructor(configs?: Partial<IContainerConfigs>);
     /**
      * 添加一个token-实现映射
      * @description

@@ -4,10 +4,13 @@ const declares_1 = require("./declares");
 const scope_pool_1 = require("./scope-pool");
 const utils_1 = require("../utils");
 class BaseDIContainer {
-    constructor() {
+    constructor(configs) {
         this.sections = [];
         this.map = new Map();
         this.sorted = [];
+        this.configs = {
+            type: "native"
+        };
         /**
          * 变量池，用来实现范围模式
          * @description
@@ -15,6 +18,7 @@ class BaseDIContainer {
          * @memberof DIContainer
          */
         this.scopePools = new Map();
+        this.configs = Object.assign({}, this.configs, (configs || {}));
     }
     get count() { return this.sorted.length; }
     /**
@@ -165,15 +169,18 @@ class BaseDIContainer {
      */
     scopeMark(item, fac) {
         const { scope, token } = item;
+        const useProxy = this.configs.type === "proxy";
         switch (scope) {
             case declares_1.InjectScope.New: return fac;
             case declares_1.InjectScope.Scope: // 实现范围模式
                 return (scopeId) => {
                     if (!scopeId)
-                        return fac();
+                        return useProxy ? createProxyInstance(fac) : fac();
                     const pool = this.scopePools.get(scopeId);
                     if (!pool) {
-                        const instance = fac(scopeId, {});
+                        const instance = useProxy ?
+                            createProxyInstance(() => fac(scopeId, {})) :
+                            fac(scopeId, {});
                         const newPool = new scope_pool_1.DIScopePool({});
                         newPool.setInstance(token, instance);
                         this.scopePools.set(scopeId, newPool);
@@ -182,7 +189,9 @@ class BaseDIContainer {
                     else {
                         const poolInstance = pool.getInstance(token);
                         if (poolInstance === undefined) {
-                            const instance = fac(scopeId, pool.metadata);
+                            const instance = useProxy ?
+                                createProxyInstance(() => fac(scopeId, pool.metadata)) :
+                                fac(scopeId, pool.metadata);
                             pool.setInstance(token, instance);
                             return instance;
                         }
@@ -204,6 +213,34 @@ class BaseDIContainer {
     }
 }
 exports.BaseDIContainer = BaseDIContainer;
+/**
+ * 用Proxy的方式创建对象instance
+ * @description
+ * @author Big Mogician
+ * @template T
+ * @param {() => T} fac
+ * @returns {T}
+ */
+function createProxyInstance(fac) {
+    const proxy = { init: false, source: undefined };
+    return new Proxy(proxy, {
+        get(target, p) {
+            if (!target.init) {
+                target.source = fac();
+                target.init = true;
+            }
+            return target.source[p];
+        },
+        set(target, p, v) {
+            if (!target.init) {
+                target.source = fac();
+                target.init = true;
+            }
+            target.source[p] = v;
+            return true;
+        }
+    });
+}
 /**
  * 依次递归解析下一层级的依赖信息
  * @description
