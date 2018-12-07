@@ -37,7 +37,7 @@ di.register(Interface, Implement, InjectScope.New);
 // 工厂方法来进行设置
 di.register(Interface, (scopeId?, {...}) => new Implement(...), InjectScope.Singleton);
 
-// 直接食用创建好的实例来解析
+// 直接使用创建好的实例来解析
 di.register(Interface, new Implement(...));
 
 // 完成解析构建
