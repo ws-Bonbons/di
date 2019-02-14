@@ -5,8 +5,9 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "scripts": {
-        "build": "tsc -project tsconfig.json",
-        "build:package": "webpack --config webpack.config.js"
+        "build": "make build",
+        "build:rc": "make rc",
+        "build:package": "make pkg"
     },
     "repository": {
         "type": "git",
