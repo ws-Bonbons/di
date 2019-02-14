@@ -22,15 +22,15 @@
         "reflect-metadata": "0.1.12"
     },
     "devDependencies": {
-        "fuse-box": "3.6.0",
-        "fuse-box-typechecker": "2.11.0",
-        "tslint-config-prettier": "1.17.0",
+        "@types/chai": "^4.1.7",
+        "@types/mocha": "^5.2.6",
         "@types/node": "^10.3.2",
-        "tslint": "^5.10.0",
-        "typescript": "^3.2.0",
         "chai": "^4.2.0",
         "mocha": "^5.2.0",
         "nyc": "^13.0.1",
-        "source-map-support": "^0.5.9"
+        "source-map-support": "^0.5.9",
+        "tslint": "^5.10.0",
+        "tslint-config-prettier": "1.17.0",
+        "typescript": "^3.2.0"
     }
 }
