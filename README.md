@@ -3,6 +3,7 @@
 @bonbons/di
 
 [![Build Status](https://travis-ci.org/ws-Bonbons/options.svg?branch=master)](https://travis-ci.org/ws-Bonbons/options)
+[![Coverage Status](https://coveralls.io/repos/github/ws-Bonbons/di/badge.svg?branch=master)](https://coveralls.io/github/ws-Bonbons/di?branch=master)
 [![package version](https://badge.fury.io/js/%40bonbons%2Fdi.svg)](https://badge.fury.io/js/%40bonbons%2Fdi.svg)
 
 > 依赖注入 node.js 实现
