@@ -8,8 +8,9 @@
         "build": "make build",
         "build:rc": "make rc",
         "build:package": "make pkg",
-        "test": "mocha -r ts-node/register src/**/*.spec.ts",
-        "cover": "nyc mocha src/**/*.spec.ts"
+        "test": "mocha -r ts-node/register test/**/*.spec.ts",
+        "cover": "nyc mocha test/**/*.spec.ts",
+        "coverage": "npm run cover && nyc report --reporter=text-lcov | coveralls"
     },
     "repository": {
         "type": "git",
@@ -22,9 +23,12 @@
     },
     "homepage": "https://github.com/ws-Bonbons/di#readme",
     "nyc": {
+        "all": true,
         "include": [
             "src/**/*.ts",
-            "src/**/*.tsx"
+            "src/**/*.tsx",
+            "test/**/*.ts",
+            "test/**/*.tsx"
         ],
         "extension": [
             ".ts"
@@ -47,6 +51,7 @@
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.3.2",
         "chai": "^4.2.0",
+        "coveralls": "^3.0.2",
         "mocha": "^5.2.0",
         "nyc": "^13.0.1",
         "source-map-support": "^0.5.9",
