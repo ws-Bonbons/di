@@ -1,5 +1,5 @@
 export interface Constructor<T> {
-  new(...args: any[]): T;
+  new (...args: any[]): T;
   prototype: T;
 }
 
@@ -32,7 +32,7 @@ export const RETURN_META_KEY = "design:returntype";
 export enum InjectScope {
   Singleton = 0,
   Scope = 1,
-  New = 2
+  New = 2,
 }
 
 export interface IBaseInjectable {

@@ -6,7 +6,7 @@ export const Colors = {
   yellow: "\x1b[33m",
   cyan: "\x1b[36m",
   magenta: "\x1b[35m",
-  white: "\x1b[37m"
+  white: "\x1b[37m",
 };
 
 export function setColor(name: string, value: any): string {
@@ -14,5 +14,9 @@ export function setColor(name: string, value: any): string {
 }
 
 export function isFunction(target: any) {
-  return Object.prototype.toString.call(target) === "[object Function]" && !target.prototype && target !== Object;
+  return (
+    Object.prototype.toString.call(target) === "[object Function]" &&
+    !target.prototype &&
+    target !== Object
+  );
 }
