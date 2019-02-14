@@ -16,5 +16,11 @@ describe("@bonbons/di/src/utils.ts", () => {
 
     expect(typeof utils.isFunction, "[utils.isFunction] 's type ").to.equal("function");
     expect(typeof utils.isFunction({}), "[utils.isFunction] 's return type ").to.equal("boolean");
+    expect(utils.isFunction(() => 123), "[utils.isFunction] check {function} ").to.equal(true);
+    expect(utils.isFunction(Object), "[utils.isFunction] check {Object} ").to.equal(false);
+    expect(
+      utils.isFunction({ prototype: Object.prototype }),
+      "[utils.isFunction] check {{ prototype: Object.prototype }} "
+    ).to.equal(false);
   });
 });
