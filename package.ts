@@ -16,6 +16,17 @@ save(pkg, "./dist/package.json", json => ({
   ...json,
   main: "./index.js",
   types: "./index.d.ts",
+  scripts: undefined,
+  nyc: undefined,
+  devDependencies: {
+    ...json.devDependencies,
+    chai: undefined,
+    mocha: undefined,
+    nyc: undefined,
+    "@types/chai": undefined,
+    "@types/mocha": undefined,
+    "source-map-support": undefined,
+  },
 }));
 
 exec("cd dist && npm publish", (error: any, stdout: string, stderr: string) => {

@@ -74,7 +74,7 @@
             "check-type"
         ],
         "no-implicit-dependencies": false,
-        "object-literal-key-quotes": [true, "consistent-as-needed"],
+        "object-literal-key-quotes": false,
         "variable-name": false,
         "arrow-parens": false,
         "arrow-return-shorthand": false,
