@@ -7,9 +7,9 @@
     "scripts": {
         "build": "make build",
         "build:rc": "make rc",
-        "build:package": "make pkg",
-        "test": "mocha -r ts-node/register test/**/*.spec.ts",
-        "cover": "nyc mocha test/**/*.spec.ts",
+        "build:package": "make publish",
+        "test": "mocha",
+        "cover": "nyc mocha",
         "coverage": "npm run cover && nyc report --reporter=text-lcov | coveralls"
     },
     "repository": {
@@ -23,12 +23,10 @@
     },
     "homepage": "https://github.com/ws-Bonbons/di#readme",
     "nyc": {
-        "all": true,
+        "all": false,
         "include": [
             "src/**/*.ts",
-            "src/**/*.tsx",
-            "test/**/*.ts",
-            "test/**/*.tsx"
+            "test/**/*.ts"
         ],
         "extension": [
             ".ts"
