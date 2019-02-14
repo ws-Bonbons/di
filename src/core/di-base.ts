@@ -17,16 +17,17 @@ import { isFunction, setColor } from "../utils";
 type DeptNode = DIContainerEntry<any>;
 
 export abstract class BaseDIContainer implements IDIContainer {
-
   private sections: Array<DeptNode[]> = [];
   private map = new Map<any, DeptNode>();
   private sorted: DeptNode[] = [];
 
   private configs: IContainerConfigs = {
-    type: "native"
+    type: "native",
   };
 
-  public get count(): number { return this.sorted.length; }
+  public get count(): number {
+    return this.sorted.length;
+  }
 
   /**
    * 变量池，用来实现范围模式
@@ -36,7 +37,11 @@ export abstract class BaseDIContainer implements IDIContainer {
    */
   protected scopePools: Map<ScopeID, DIScopePool> = new Map<ScopeID, DIScopePool>();
 
-  public abstract register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
+  public abstract register<K, V>(
+    token: InjectToken<K>,
+    imp: Implement<V>,
+    scope: InjectScope
+  ): void;
   public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
 
   constructor(configs?: Partial<IContainerConfigs>) {
@@ -56,12 +61,12 @@ export abstract class BaseDIContainer implements IDIContainer {
   protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>) {
     const { imp } = entry;
     const isFactory = isFunction(imp || {});
-    const isConstructor = !!((<any>imp).prototype);
+    const isConstructor = !!(<any>imp).prototype;
     this.map.set(token, {
       ...entry,
       fac: isFactory ? <ImplementFactory<any>>imp : !isConstructor ? () => imp : null,
       getInstance: null,
-      level: -1
+      level: -1,
     });
   }
 
@@ -112,10 +117,10 @@ export abstract class BaseDIContainer implements IDIContainer {
   public getConfig() {
     return this.sorted.map(i => ({
       contract: i.token && (<any>i.token).name,
-      implement: (i.imp && (<any>i.imp.name)) || "[factory or instance]",
+      implement: (i.imp && <any>i.imp.name) || "[factory or instance]",
       scope: i.scope,
       level: i.level,
-      dependencies: i.depts.map(i => (<any>i).name)
+      dependencies: i.depts.map(i => (<any>i).name),
     }));
   }
 
@@ -142,9 +147,9 @@ export abstract class BaseDIContainer implements IDIContainer {
    */
   private resolve() {
     const queue = Array.from(this.map.values());
-    this.sort(queue)
-      .forEach(item =>
-        item.getInstance = this.scopeMark(item, this.createFactory(item)));
+    this.sort(queue).forEach(
+      item => (item.getInstance = this.scopeMark(item, this.createFactory(item)))
+    );
   }
 
   /**
@@ -167,10 +172,10 @@ export abstract class BaseDIContainer implements IDIContainer {
     this.decideSection(queue.filter(i => i.depts.length > 0), queue, this.sections, 1);
     // 注入level信息
     this.sections.forEach((each, index) => {
-      each.forEach(i => i.level = index + 1);
+      each.forEach(i => (i.level = index + 1));
     });
     // 拼合整个依赖队列
-    return this.sorted = this.sections.reduce((pre, cur) => ([...pre, ...cur]));
+    return (this.sorted = this.sections.reduce((pre, cur) => [...pre, ...cur]));
   }
 
   /**
@@ -185,7 +190,12 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @returns
    * @memberof DIContainer
    */
-  private decideSection(queue: DeptNode[], sourceQueue: DeptNode[], sections: Array<DeptNode[]>, current: number) {
+  private decideSection(
+    queue: DeptNode[],
+    sourceQueue: DeptNode[],
+    sections: Array<DeptNode[]>,
+    current: number
+  ) {
     if (queue.length === 0) return;
     // 获得当前级别的依赖数组
     const wants = queue.filter(item => resolveUnder(item, sections, current - 1, sourceQueue));
@@ -206,19 +216,23 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @returns {(Nullable<(scopeId?: ScopeID) => T | null>)}
    * @memberof DIContainer
    */
-  private scopeMark<T>(item: DIContainerEntry<T>, fac: ImplementFactory<T>): Nullable<(scopeId?: ScopeID) => T | null> {
+  private scopeMark<T>(
+    item: DIContainerEntry<T>,
+    fac: ImplementFactory<T>
+  ): Nullable<(scopeId?: ScopeID) => T | null> {
     const { scope, token } = item;
     const useProxy = this.configs.type === "proxy";
     switch (scope) {
-      case InjectScope.New: return fac;
+      case InjectScope.New:
+        return fac;
       case InjectScope.Scope: // 实现范围模式
         return (scopeId?: ScopeID) => {
           if (!scopeId) return useProxy ? createProxyInstance(fac) : fac();
           const pool = this.scopePools.get(<ScopeID>scopeId);
           if (!pool) {
-            const instance = useProxy ?
-              createProxyInstance(() => fac(scopeId, {})) :
-              fac(scopeId, {});
+            const instance = useProxy
+              ? createProxyInstance(() => fac(scopeId, {}))
+              : fac(scopeId, {});
             const newPool = new DIScopePool({});
             newPool.setInstance(token, instance);
             this.scopePools.set(<string>scopeId, newPool);
@@ -226,9 +240,9 @@ export abstract class BaseDIContainer implements IDIContainer {
           } else {
             const poolInstance = pool.getInstance(token);
             if (poolInstance === undefined) {
-              const instance = useProxy ?
-                createProxyInstance(() => fac(scopeId, pool.metadata)) :
-                fac(scopeId, pool.metadata);
+              const instance = useProxy
+                ? createProxyInstance(() => fac(scopeId, pool.metadata))
+                : fac(scopeId, pool.metadata);
               pool.setInstance(token, instance);
               return instance;
             } else {
@@ -236,17 +250,17 @@ export abstract class BaseDIContainer implements IDIContainer {
             }
           }
         };
-      default: // 单例模式，直接用闭包特性来实现
+      default:
+        // 单例模式，直接用闭包特性来实现
         return (() => {
           let instance: any;
           return () => {
             if (instance) return instance;
-            return instance = fac();
+            return (instance = fac());
           };
         })();
     }
   }
-
 }
 
 /**
@@ -274,7 +288,7 @@ function createProxyInstance<T>(fac: () => T): T {
       }
       target.source[p] = v;
       return true;
-    }
+    },
   });
 }
 
@@ -288,7 +302,12 @@ function createProxyInstance<T>(fac: () => T): T {
  * @param {DeptNode[]} sourceQueue
  * @returns
  */
-function resolveUnder(node: DeptNode, sections: Array<DeptNode[]>, checkIndex: number, sourceQueue: DeptNode[]) {
+function resolveUnder(
+  node: DeptNode,
+  sections: Array<DeptNode[]>,
+  checkIndex: number,
+  sourceQueue: DeptNode[]
+) {
   const checkArr: DeptNode[] = [];
   if (checkIndex < 0) return false;
   let index = checkIndex;
@@ -301,20 +320,29 @@ function resolveUnder(node: DeptNode, sections: Array<DeptNode[]>, checkIndex: n
   // 所以这里需要检查节点的所有depts
   const isresolved = node.depts.every(i => checkArr.map(m => m.token).includes(i));
   // 任何不可达错误发生，可以中断应用程序
-  if (!isresolved && !node.depts.every(i => sourceQueue.map(m => m.token).includes(i))) throw resolveError(node.imp, node.depts);
+  if (!isresolved && !node.depts.every(i => sourceQueue.map(m => m.token).includes(i))) {
+    throw resolveError(node.imp, node.depts);
+  }
   return isresolved;
 }
 
 function resolveError(el: any, depts: any[]) {
   return invalidOperation(
-    `Resolve dependency error : the dependency queue is broken caused by [${setColor("green", (el && el.name) || "unknown name")}]. ` +
-    `the depedency list is [${setColor("blue", (depts || []).map(i => i.name || "??").join(", "))}]`
+    `Resolve dependency error : the dependency queue is broken caused by [${setColor(
+      "green",
+      (el && el.name) || "unknown name"
+    )}]. ` +
+      `the depedency list is [${setColor(
+        "blue",
+        (depts || []).map(i => i.name || "??").join(", ")
+      )}]`
   );
 }
 
 function duplicateError(el: any) {
   return invalidOperation(
-    `register service error : the inject token is duplicate : [${(el && el.name) || "unknown name"}]. `
+    `register service error : the inject token is duplicate : [${(el && el.name) ||
+      "unknown name"}]. `
   );
 }
 
@@ -323,5 +351,9 @@ export function invalidOperation(error: string, more?: any) {
 }
 
 export function ERROR(error: string, more?: any) {
-  return new Error(`${setColor("cyan", error)} \n[ ${setColor("magenta", "more details")} ] : ${(JSON.stringify(more)) || "none"}`);
+  return new Error(
+    `${setColor("cyan", error)} \n[ ${setColor("magenta", "more details")} ] : ${JSON.stringify(
+      more
+    ) || "none"}`
+  );
 }

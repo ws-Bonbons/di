@@ -1,10 +1,11 @@
 # Bonbons-DI
+
 @bonbons/di
 
 [![Build Status](https://travis-ci.org/ws-Bonbons/options.svg?branch=master)](https://travis-ci.org/ws-Bonbons/options)
 [![package version](https://badge.fury.io/js/%40bonbons%2Fdi.svg)](https://badge.fury.io/js/%40bonbons%2Fdi.svg)
 
-> 依赖注入node.js实现
+> 依赖注入 node.js 实现
 
 ## 安装
 
@@ -20,7 +21,7 @@ yarn add @bonbons/di
 
 ```typescript
 import { DIContainer, InjectScope } from "@bonbons/di";
-import { Interface, Implement } from "your/code";
+import { AbstractClass as Interface, ImplementClass as Implement } from "your/code";
 
 // 创建di容器
 const di = new DIContainer();

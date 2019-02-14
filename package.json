@@ -1,32 +1,58 @@
 {
     "name": "@bonbons/di",
-    "version": "1.3.3",
+    "version": "1.3.4-rc.1",
     "description": "@bonbons/di",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "scripts": {
-        "build": "tsc -project tsconfig.json",
-        "build:package": "webpack --config webpack.config.js"
+        "build": "make build",
+        "build:rc": "make rc",
+        "build:package": "make pkg",
+        "test": "mocha -r ts-node/register src/**/*.spec.ts",
+        "cover": "nyc mocha src/**/*.spec.ts"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/ws-Bonbons/di.git"
     },
-    "author": "bws",
+    "author": "bigmogician",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/ws-Bonbons/di/issues"
     },
     "homepage": "https://github.com/ws-Bonbons/di#readme",
+    "nyc": {
+        "include": [
+            "src/**/*.ts",
+            "src/**/*.tsx"
+        ],
+        "extension": [
+            ".ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ],
+        "reporter": [
+            "text-summary",
+            "html"
+        ],
+        "sourceMap": true,
+        "instrument": true
+    },
     "dependencies": {
         "reflect-metadata": "0.1.12"
     },
     "devDependencies": {
-        "@types/node": "10.3.2",
-        "fuse-box": "3.6.0",
-        "fuse-box-typechecker": "2.11.0",
-        "tslint": "5.10.0",
+        "@types/chai": "^4.1.7",
+        "@types/mocha": "^5.2.6",
+        "@types/node": "^10.3.2",
+        "chai": "^4.2.0",
+        "mocha": "^5.2.0",
+        "nyc": "^13.0.1",
+        "source-map-support": "^0.5.9",
+        "ts-node": "^8.0.2",
+        "tslint": "^5.10.0",
         "tslint-config-prettier": "1.17.0",
-        "typescript": "3.0.1"
+        "typescript": "^3.2.0"
     }
 }

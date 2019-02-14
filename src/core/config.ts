@@ -4,7 +4,6 @@ type Configs = IConfigCollection;
 type Token<T> = IToken<T>;
 
 export class ConfigCollection implements Configs {
-
   protected _pool = new Map<symbol, { value: any }>();
 
   public set<T>(token: Token<T>, entry: T): void {
@@ -17,7 +16,9 @@ export class ConfigCollection implements Configs {
   }
 
   public toArray(): IEntry<any>[] {
-    return Array.from(this._pool.entries()).map(([sb, { value }]) => ({ token: { key: sb }, value }));
+    return Array.from(this._pool.entries()).map(([sb, { value }]) => ({
+      token: { key: sb },
+      value,
+    }));
   }
-
 }

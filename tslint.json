@@ -74,7 +74,7 @@
             "check-type"
         ],
         "no-implicit-dependencies": false,
-        "object-literal-key-quotes": [true, "consistent-as-needed"],
+        "object-literal-key-quotes": false,
         "variable-name": false,
         "arrow-parens": false,
         "arrow-return-shorthand": false,
@@ -106,6 +106,7 @@
         "no-namespace": false,
         "no-reference": false,
         "object-literal-sort-keys": false,
-        "one-variable-per-declaration": false
+        "one-variable-per-declaration": false,
+        "unified-signatures": false
     }
 }
