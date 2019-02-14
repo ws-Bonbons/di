@@ -14,7 +14,7 @@ fs.writeFileSync(
   JSON.stringify(
     {
       ...package,
-      main: "./index.js"
+      main: "./index.js",
     },
     null,
     "  "

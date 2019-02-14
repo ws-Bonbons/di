@@ -1,12 +1,13 @@
 import { InjectToken } from "./declares";
 
 export class DIScopePool<T = any> {
-
   private instanceMap = new Map<InjectToken, any>();
 
-  constructor(private scopeMetadata: { ctx?: T }) { }
+  constructor(private scopeMetadata: { ctx?: T }) {}
 
-  public get metadata() { return this.scopeMetadata; }
+  public get metadata() {
+    return this.scopeMetadata;
+  }
 
   setInstance<T>(token: InjectToken<T>, instance: T): void {
     this.instanceMap.set(token, instance || null);
@@ -37,5 +38,4 @@ export class DIScopePool<T = any> {
     this.scopeMetadata = undefined;
     this.instanceMap = undefined;
   }
-
 }
