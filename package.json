@@ -7,7 +7,9 @@
     "scripts": {
         "build": "make build",
         "build:rc": "make rc",
-        "build:package": "make pkg"
+        "build:package": "make pkg",
+        "test": "mocha -r ts-node/register src/**/*.spec.ts",
+        "cover": "nyc mocha src/**/*.spec.ts"
     },
     "repository": {
         "type": "git",
