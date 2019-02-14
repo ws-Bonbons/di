@@ -9,3 +9,4 @@ before_script:
   - npm install typescript@2.9.1 -g
 script:
   - npm run build
+after_success: npm run coverage

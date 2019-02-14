@@ -1,9 +1,8 @@
-import * as utils from "./utils";
-
+import * as utils from "../src/utils";
 import { expect } from "chai";
-import "mocha";
+import { defineUnit } from "./unit";
 
-describe("@bonbons/di/src/utils.ts", () => {
+defineUnit(["utils", "Utils工具包"], () => {
   it("test utils exports", () => {
     expect(Object.keys(utils).length, "[utils] exports count").to.equal(3);
   });
