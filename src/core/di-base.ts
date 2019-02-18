@@ -16,6 +16,21 @@ import { isFunction, setColor } from "../utils";
 
 type DeptNode = DIContainerEntry<any>;
 
+export const Helpers = {
+  isFactory(target: any): boolean {
+    return isFunction(target);
+  },
+  isClass(target: any): boolean {
+    if (isFunction(target)) return false;
+    return !!(<any>target).prototype;
+  },
+  isValue(target: any): boolean {
+    if (isFunction(target)) return false;
+    if (!!(<any>target).prototype) return false;
+    return true;
+  },
+};
+
 export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends any = any>
   implements IDIContainer<ID, SCOPE> {
   private sections: Array<DeptNode[]> = [];
@@ -61,7 +76,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    */
   protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>) {
     const { imp } = entry;
-    const isFactory = isFunction(imp || {});
+    const isFactory = Helpers.isFactory(imp || {});
     const isConstructor = !!(<any>imp).prototype;
     this.map.set(token, {
       ...entry,
