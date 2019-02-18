@@ -5,7 +5,8 @@ branches:
   only:
     - master
 before_script:
-  - npm install
-  - npm install typescript@2.9.1 -g
+  - yarn
+  - yarn global add typescript
 script:
-  - npm run build
+  - yarn run build
+after_success: yarn run coverage
