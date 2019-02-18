@@ -58,13 +58,19 @@ export type ImplementToken<T> = ImplementType<T>;
 export type IInjectable = Constructor<IBaseInjectable>;
 
 /** 依赖注入项工长 */
-export type ImplementFactory<T> = (scopeId?: ScopeID, scopeData?: any) => T;
-export type IDeptFactory<T> = ImplementFactory<T>;
+export type ImplementFactory<T, SCOPE extends ScopeID> = (
+  scopeId?: SCOPE,
+  scopeData?: ScopeMetadata<SCOPE, any>
+) => T;
+export type IDeptFactory<T, SCOPE extends ScopeID> = ImplementFactory<T, SCOPE>;
 
-export type InjectDIToken<T = any> = Constructor<T> | AbstractType<T>;
-export type InjectToken<T = any> = InjectDIToken<T>;
-export type ImplementDIValue<T = any> = ImplementType<T> | T | ImplementFactory<T>;
-export type Implement<T = any> = ImplementDIValue<T>;
+export type InjectDIToken<T> = Constructor<T> | AbstractType<T>;
+export type InjectToken<T> = InjectDIToken<T>;
+export type ImplementDIValue<T, SCOPE extends ScopeID> =
+  | ImplementType<T>
+  | T
+  | ImplementFactory<T, SCOPE>;
+export type Implement<T, SCOPE extends ScopeID> = ImplementDIValue<T, SCOPE>;
 
 export interface IToken<T> {
   key: symbol;
@@ -86,22 +92,27 @@ export interface IConfigCollection extends ConfigsCollection {
   toArray(): IEntry<any>[];
 }
 
-export interface DIEntry {
-  getInstance(): any;
+export interface DIEntry<T = any> {
+  getInstance(): T;
 }
 
-export interface ReadonlyDIContainer {
-  get<T>(token: InjectToken<T>, scopeId?: ScopeID): T;
+export interface ReadonlyDIContainer<ID extends ScopeID = string> {
+  get<T>(token: InjectToken<T>, scopeId?: ID): T;
 }
 
-export interface IDIContainer extends ReadonlyDIContainer {
+export type ScopeMetadata<ID, SCOPE> = SCOPE & {
+  readonly scopeId: ID;
+};
+
+export interface IDIContainer<ID extends ScopeID = string, SCOPE = any>
+  extends ReadonlyDIContainer<ID> {
   count: number;
-  register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope);
-  getDepedencies<T>(depts: InjectToken[], scopeId?: ScopeID): any[];
+  register<K, V>(token: InjectToken<K>, imp: Implement<V, ID>, scope: InjectScope): void;
+  getDepedencies(depts: InjectToken<any>[], scopeId?: ID): any[];
   getConfig(): any;
   complete(): void;
-  createScope(scopeId: ScopeID, metadata: any): void;
-  dispose(scopeId?: ScopeID): void;
+  createScope(scopeId: ID, metadata: SCOPE): void;
+  dispose(scopeId?: ID): void;
 }
 
 /**
@@ -118,7 +129,7 @@ export interface DepedencyResolveEntry<T = any> {
   /** 实现 */
   imp: any;
   /** 依赖的其他令牌数组 */
-  depts: InjectToken[];
+  depts: InjectToken<any>[];
   /** 注入项的生命周期和解析范围 */
   scope: InjectScope;
 }
@@ -134,7 +145,7 @@ export interface DepedencyResolveEntry<T = any> {
  */
 export interface DIContainerEntry<T> extends DepedencyResolveEntry<T> {
   /** 工程方法，手工提供或者由框架生成 */
-  fac: Nullable<ImplementFactory<any>>;
+  fac: Nullable<ImplementFactory<any, any>>;
   /** 包裹处理scope之后的工程方法，是解析依赖项的最终执行方法 */
   getInstance: Nullable<(scopeId?: ScopeID) => T | null>;
   /** 当前依赖项的依赖层级，高级依赖低级 */

@@ -1,9 +1,9 @@
-import { InjectToken } from "./declares";
+import { InjectToken, ScopeMetadata, ScopeID } from "./declares";
 
-export class DIScopePool<T = any> {
-  private instanceMap = new Map<InjectToken, any>();
+export class DIScopePool<ID extends ScopeID = string, SCOPE = any> {
+  private instanceMap = new Map<InjectToken<any>, any>();
 
-  constructor(private scopeMetadata: { ctx?: T }) {}
+  constructor(private scopeMetadata: ScopeMetadata<ID, SCOPE>) {}
 
   public get metadata() {
     return this.scopeMetadata;
@@ -18,11 +18,11 @@ export class DIScopePool<T = any> {
     return instance;
   }
 
-  update(newMaps: Array<[InjectToken, any]>): void;
+  update(newMaps: Array<[InjectToken<any>, any]>): void;
   update(resolver: <T>(token: InjectToken<T>) => T | null): void;
   update(args: any): void {
     if (args instanceof Array) {
-      const newMaps: Array<[InjectToken, any]> = args;
+      const newMaps: Array<[InjectToken<any>, any]> = args;
       newMaps.forEach(([key, instance]) => {
         this.instanceMap.set(key, instance);
       });

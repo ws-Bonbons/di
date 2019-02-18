@@ -16,7 +16,8 @@ import { isFunction, setColor } from "../utils";
 
 type DeptNode = DIContainerEntry<any>;
 
-export abstract class BaseDIContainer implements IDIContainer {
+export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE = any>
+  implements IDIContainer<ID, SCOPE> {
   private sections: Array<DeptNode[]> = [];
   private map = new Map<any, DeptNode>();
   private sorted: DeptNode[] = [];
@@ -35,14 +36,14 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @protected
    * @memberof DIContainer
    */
-  protected scopePools: Map<ScopeID, DIScopePool> = new Map<ScopeID, DIScopePool>();
+  protected scopePools: Map<ID, DIScopePool> = new Map<ID, DIScopePool>();
 
   public abstract register<K, V>(
     token: InjectToken<K>,
-    imp: Implement<V>,
+    imp: Implement<V, ID>,
     scope: InjectScope
   ): void;
-  public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T>;
+  public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T, ID>;
 
   constructor(configs?: Partial<IContainerConfigs>) {
     this.resetConfigs(configs || {});
@@ -64,7 +65,7 @@ export abstract class BaseDIContainer implements IDIContainer {
     const isConstructor = !!(<any>imp).prototype;
     this.map.set(token, {
       ...entry,
-      fac: isFactory ? <ImplementFactory<any>>imp : !isConstructor ? () => imp : null,
+      fac: isFactory ? <ImplementFactory<any, ID>>imp : !isConstructor ? () => imp : null,
       getInstance: null,
       level: -1,
     });
@@ -79,11 +80,11 @@ export abstract class BaseDIContainer implements IDIContainer {
     this.resolve();
   }
 
-  public createScope(scopeId: ScopeID, metadata: any) {
-    this.scopePools.set(scopeId, new DIScopePool({ ...metadata }));
+  public createScope(scopeId: ID, metadata: SCOPE) {
+    this.scopePools.set(scopeId, new DIScopePool({ ...metadata, scopeId }));
   }
 
-  public dispose(scopeId?: ScopeID) {
+  public dispose(scopeId?: ID) {
     if (scopeId) {
       const pool = this.scopePools.get(scopeId);
       if (pool) pool.dispose();
@@ -97,11 +98,11 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @author Big Mogician
    * @template T
    * @param {InjectToken<T>} token
-   * @param {ScopeID} [scopeId]
+   * @param {ID} [scopeId]
    * @returns {(T | null)}
    * @memberof DIContainer
    */
-  public get<T>(token: InjectToken<T>, scopeId?: ScopeID): T | null {
+  public get<T>(token: InjectToken<T>, scopeId?: ID): T | null {
     const value = this.map.get(token) || null;
     if (value === null || value.getInstance === null) return null;
     return value.getInstance(scopeId) || null;
@@ -129,12 +130,12 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @description
    * @author Big Mogician
    * @template T
-   * @param {InjectToken[]} depts
-   * @param {ScopeID} scopeId
+   * @param {InjectToken<any>[]} depts
+   * @param {ID} scopeId
    * @returns
    * @memberof DIContainer
    */
-  public getDepedencies<T>(depts: InjectToken[], scopeId?: ScopeID) {
+  public getDepedencies<T>(depts: InjectToken<any>[], scopeId?: ID) {
     return depts.length === 0 ? [] : depts.map(i => this.get(i, scopeId));
   }
 
@@ -212,30 +213,31 @@ export abstract class BaseDIContainer implements IDIContainer {
    * @private
    * @template T
    * @param {DIContainerEntry<T>} item
-   * @param {ImplementFactory<T>} fac
-   * @returns {(Nullable<(scopeId?: ScopeID) => T | null>)}
+   * @param {ImplementFactory<T, ID>} fac
+   * @returns {(Nullable<(scopeId?: ID) => T | null>)}
    * @memberof DIContainer
    */
   private scopeMark<T>(
     item: DIContainerEntry<T>,
-    fac: ImplementFactory<T>
-  ): Nullable<(scopeId?: ScopeID) => T | null> {
+    fac: ImplementFactory<T, ID>
+  ): Nullable<(scopeId?: ID) => T | null> {
     const { scope, token } = item;
     const useProxy = this.configs.type === "proxy";
     switch (scope) {
       case InjectScope.New:
         return fac;
       case InjectScope.Scope: // 实现范围模式
-        return (scopeId?: ScopeID) => {
+        return (scopeId?: ID) => {
           if (!scopeId) return useProxy ? createProxyInstance(fac) : fac();
-          const pool = this.scopePools.get(<ScopeID>scopeId);
+          const pool = this.scopePools.get(<ID>scopeId);
           if (!pool) {
+            const metadata = { scopeId };
+            const newPool = new DIScopePool(metadata);
             const instance = useProxy
-              ? createProxyInstance(() => fac(scopeId, {}))
-              : fac(scopeId, {});
-            const newPool = new DIScopePool({});
+              ? createProxyInstance(() => fac(scopeId, metadata))
+              : fac(scopeId, metadata);
             newPool.setInstance(token, instance);
-            this.scopePools.set(<string>scopeId, newPool);
+            this.scopePools.set(<ID>scopeId, newPool);
             return <T>instance;
           } else {
             const poolInstance = pool.getInstance(token);
