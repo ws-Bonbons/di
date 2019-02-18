@@ -51,6 +51,9 @@ defineUnit(["core/scope-pool", "Core::ScopePool"], () => {
     });
     expect(instance.getInstance(Test2), "[core/scope-pool.new()].update ").to.equal(v6);
 
+    instance.setInstance(Test2, undefined);
+    expect(instance.getInstance(Test2), "[core/scope-pool.new()].update ").to.equal(null);
+
     instance.dispose();
     expect(instance.metadata, "[core/scope-pool.new()].update ").to.equal(undefined);
   });
