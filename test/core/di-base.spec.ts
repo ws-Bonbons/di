@@ -4,6 +4,6 @@ import { defineUnit } from "../unit";
 
 defineUnit(["core/di-base", "Core::DiBase"], () => {
   it("test core/di-base exports", () => {
-    expect(Object.keys(DIBASE).length, "[core/di-base] exports count").to.equal(3);
+    expect(Object.keys(DIBASE).length, "[core/di-base] exports count").to.equal(4);
   });
 });
