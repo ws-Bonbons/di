@@ -16,7 +16,7 @@ import { isFunction, setColor } from "../utils";
 
 type DeptNode = DIContainerEntry<any>;
 
-export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE = any>
+export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends any = any>
   implements IDIContainer<ID, SCOPE> {
   private sections: Array<DeptNode[]> = [];
   private map = new Map<any, DeptNode>();
@@ -81,7 +81,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE = any>
   }
 
   public createScope(scopeId: ID, metadata: SCOPE) {
-    this.scopePools.set(scopeId, new DIScopePool({ ...metadata, scopeId }));
+    this.scopePools.set(scopeId, new DIScopePool(<any>{ ...(<any>metadata), scopeId }));
   }
 
   public dispose(scopeId?: ID) {

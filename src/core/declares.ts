@@ -104,7 +104,7 @@ export type ScopeMetadata<ID, SCOPE> = SCOPE & {
   readonly scopeId: ID;
 };
 
-export interface IDIContainer<ID extends ScopeID = string, SCOPE = any>
+export interface IDIContainer<ID extends ScopeID = string, SCOPE extends any = any>
   extends ReadonlyDIContainer<ID> {
   count: number;
   register<K, V>(token: InjectToken<K>, imp: Implement<V, ID>, scope: InjectScope): void;
