@@ -62,7 +62,7 @@ typings/
 .DS_Store
 
 # IDEs
-.vscode
+# .vscode
 
 # dist
 dist/
