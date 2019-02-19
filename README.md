@@ -10,11 +10,11 @@
 
 ## 安装
 
-```
+```bash
 npm install @bonbons/di --save
 ```
 
-```
+```bash
 yarn add @bonbons/di
 ```
 

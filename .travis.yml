@@ -9,4 +9,5 @@ before_script:
   - yarn global add typescript
 script:
   - yarn run build
+  - yarn run test
 after_success: yarn run coverage
