@@ -26,7 +26,6 @@ module.exports = (args = {}) =>
         "@types/mocha": undefined,
         "source-map-support": undefined,
         "tslint-config-prettier": undefined,
-        "ts-node": undefined,
       },
     }),
     ...args,
