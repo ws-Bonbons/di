@@ -1,7 +1,7 @@
 const { run } = require("@bigmogician/publisher");
 
 run({
-  debug: true,
+  debug: false,
   rc: false,
   add: 1,
   whiteSpace: "    ",
