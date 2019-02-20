@@ -4,7 +4,7 @@ module.exports = (args = {}) =>
   run({
     debug: false,
     rc: false,
-    add: 1,
+    add: 0,
     whiteSpace: "    ",
     rootPath: ".",
     outDist: "dist",
