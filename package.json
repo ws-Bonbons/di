@@ -45,6 +45,7 @@
         "reflect-metadata": "0.1.12"
     },
     "devDependencies": {
+        "@bigmogician/publisher": "^1.0.2",
         "@types/chai": "^4.1.7",
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.3.2",

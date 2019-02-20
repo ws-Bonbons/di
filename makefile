@@ -9,7 +9,7 @@ build:
 	tsc
 
 rc: build
-	node -r ts-node/register ./package.ts --rc 1
+	node ./pkg.rc.js
 
 publish: build
-	node -r ts-node/register ./package.ts
+	node ./pkg.js

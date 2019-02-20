@@ -10,7 +10,6 @@ const [main, oldrc] = (version || "").split("-");
 let [, rc = 0] = (oldrc || "").split(".");
 rc = Number(rc) + Number(rcadd);
 pkg.version = `${main}${!!rctokrn ? `-rc.${rc}` : ""}`;
-fs.writeFileSync("./package.json", JSON.stringify(pkg, null, BLOCK));
 save(pkg, "./package.json");
 save(pkg, "./dist/package.json", json => ({
   ...json,
