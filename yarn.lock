@@ -90,6 +90,11 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@bigmogician/publisher@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@bigmogician/publisher/-/publisher-1.0.2.tgz#c2f252ca3049f2564bb3b4d6cb08ed0abb4e63a4"
+  integrity sha512-1OZ2BozB/ifTK3lTNKpTvsS1IoDxCZnj+G+jRRl5B24yaFJ/OOBSO1Npd+mgGgp9rR1LeJnML6Ob0NgxlrcIkw==
+
 "@types/chai@^4.1.7":
   version "4.1.7"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
