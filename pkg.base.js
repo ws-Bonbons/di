@@ -2,7 +2,7 @@ const { run } = require("@bigmogician/publisher");
 
 module.exports = (args = {}) =>
   run({
-    debug: true,
+    debug: false,
     rc: false,
     add: 1,
     whiteSpace: "    ",
