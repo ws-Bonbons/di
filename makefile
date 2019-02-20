@@ -12,4 +12,4 @@ rc: build
 	node ./pkg.rc.js
 
 publish: build
-	node ./pkg.js
+	node ./pkg.build.js
