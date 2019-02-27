@@ -28,19 +28,27 @@ import { AbstractClass as Interface, ImplementClass as Implement } from "your/co
 const di = new DIContainer();
 
 // 注入一个全局单例
-di.register(Interface, Implement, InjectScope.Singleton);
+di.register({ token: Interface, imp: Implement, scope: InjectScope.Singleton });
 
 // 注入一个范围单例
-di.register(Interface, Implement, InjectScope.Scoped);
+di.register({ token: Interface, imp: Implement, scope: InjectScope.Scoped });
 
 // 注入一个总是新建的实例
-di.register(Interface, Implement, InjectScope.New);
+di.register({ token: Interface, imp: Implement, scope: InjectScope.New });
 
-// 工厂方法来进行设置
-di.register(Interface, (scopeId?, {...}) => new Implement(...), InjectScope.Singleton);
+// 工厂方法来进行设置（最底层）
+di.register({ token: Interface, imp: (scopeId?, {...}) => new Implement(...), scope: InjectScope.Singleton });
+
+// 依赖注入工厂方法来进行设置
+di.register({
+  token: Interface,
+  depts: [Class1, Class2],
+  imp: (...args: [Class1, Class2]) => new Implement(...args),
+  scope: InjectScope.Singleton
+});
 
 // 直接使用创建好的实例来解析
-di.register(Interface, new Implement(...));
+di.register({ token: Interface, imp: new Implement(...), scope: InjectScope.New });
 
 // 完成解析构建
 di.complete();

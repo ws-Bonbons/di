@@ -33,10 +33,26 @@ defineUnit(["core/container", "Core::Container"], () => {
   it("test core/container.DIContainer features", () => {
     const con = new container.DIContainer();
 
-    con.register(Test, new Test(), InjectScope.New);
-    con.register(Test2, Test2, InjectScope.New);
-    con.register(Test2, new Test2(), InjectScope.New);
-    con.register(Test2, {}, InjectScope.New);
+    con.register({
+      token: Test,
+      imp: new Test(),
+      scope: InjectScope.New,
+    });
+    con.register({
+      token: Test2,
+      imp: Test2,
+      scope: InjectScope.New,
+    });
+    con.register({
+      token: Test2,
+      imp: new Test2(),
+      scope: InjectScope.New,
+    });
+    con.register({
+      token: Test2,
+      imp: {},
+      scope: InjectScope.New,
+    });
     expect(con.count, "[core/container.DIContainer.new()] current count").to.equal(0);
 
     con.complete();

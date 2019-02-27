@@ -1,26 +1,23 @@
 import * as DIBASE from "../../src/core/di-base";
 import {
-  ImplementFactory,
   DIContainerEntry,
   InjectScope,
-  ImplementDIValue,
-  InjectDIToken,
   PARAMS_META_KEY,
+  IRegisterConfig,
+  ImplementBasicFactory,
 } from "../../src/core/declares";
 import { DIContainer } from "../../src/core/container";
 import { expect } from "chai";
 import { defineUnit } from "../unit";
 
-class DI extends DIBASE.BaseDIContainer {
-  public register<K, V>(
-    token: InjectDIToken<K>,
-    imp: ImplementDIValue<V, string>,
-    scope: InjectScope
+class DI extends DIBASE.BaseDIContainer<string> {
+  public register<K, V, DEPTS extends any[] = []>(
+    configs: IRegisterConfig<K, V, string, DEPTS>
   ): void {
     throw new Error("Method not implemented.");
   }
 
-  public createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T, string> {
+  public createFactory<T>(imp: DIContainerEntry<T>): ImplementBasicFactory<T, string, any> {
     throw new Error("Method not implemented.");
   }
 }
@@ -41,6 +38,12 @@ class Test5 {
   constructor(public x: Test, public y: Test4) {}
 }
 
+class Test6 {
+  constructor(public x: Test, public y: Test4) {}
+}
+
+class Test7 {}
+
 const dps4 = Reflect.getMetadata(PARAMS_META_KEY, Test4) || [];
 Reflect.defineMetadata(PARAMS_META_KEY, [...dps4, Test], Test4);
 
@@ -53,7 +56,7 @@ class SB {
 }
 
 const dpsSB = Reflect.getMetadata(PARAMS_META_KEY, SB) || [];
-Reflect.defineMetadata(PARAMS_META_KEY, [...dps5, Object], SB);
+Reflect.defineMetadata(PARAMS_META_KEY, [...dpsSB, Object], SB);
 
 defineUnit(["core/di-base", "Core::DiBase"], () => {
   it("test core/di-base exports", () => {
@@ -63,7 +66,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
   const con = new DI();
   it("test core/di-base feature : abstract register", () => {
     try {
-      con.register(Test, Test, InjectScope.Scope);
+      con.register({ token: Test, imp: Test, scope: InjectScope.Scope });
     } catch (e) {
       expect(e.message, "[core/di-base] register").to.equal("Method not implemented.");
     }
@@ -93,10 +96,10 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const xT5 = new Test5(new Test(), new Test4(new Test()));
 
     con2.createScope("123456", { k: 666 });
-    con2.register(Test, Test, InjectScope.Scope);
-    con2.register(Test3, () => xT3, InjectScope.Scope);
-    con2.register(Test4, Test4, InjectScope.Scope);
-    con2.register(Test5, xT5, InjectScope.Scope);
+    con2.register({ token: Test, imp: Test, scope: InjectScope.Scope });
+    con2.register({ token: Test3, imp: () => xT3, scope: InjectScope.Scope });
+    con2.register({ token: Test4, imp: Test4, scope: InjectScope.Scope });
+    con2.register({ token: Test5, imp: xT5, scope: InjectScope.Scope });
 
     const target0x = con2.get(Test, "123456");
 
@@ -140,10 +143,18 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const xT5 = new Test5(new Test(), new Test4(new Test()));
 
     con2.createScope("123456", { k: 666 });
-    con2.register(Test, Test, InjectScope.Scope);
-    con2.register(Test3, () => xT3, InjectScope.Scope);
-    con2.register(Test4, Test4, InjectScope.Scope);
-    con2.register(Test5, xT5, InjectScope.Scope);
+    con2.register({ token: Test, imp: Test, scope: InjectScope.Scope });
+    con2.register({ token: Test3, imp: () => xT3, scope: InjectScope.Scope });
+    con2.register({ token: Test4, imp: Test4, scope: InjectScope.Scope });
+    con2.register({ token: Test5, imp: xT5, scope: InjectScope.Scope });
+    con2.register({ token: Test7, imp: Test7, scope: InjectScope.Singleton });
+
+    con2.register({
+      token: Test6,
+      depts: [Test, Test4],
+      imp: (a, b) => new Test6(a, b),
+      scope: InjectScope.Scope,
+    });
 
     const target0x = con2.get(Test, "123456");
 
@@ -155,7 +166,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const kvs = con2.getConfig();
 
     expect(Object.keys(kvs).length, "[core/di-base] singleton scoped [null no complete]").to.equal(
-      4
+      6
     );
 
     const target01 = con2.get(Test, "123456");
@@ -165,6 +176,12 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const target03_4 = con2.get(Test4, "123456");
     const target03_4_1 = con2.get(Test4, "123456");
     const target05 = con2.get(Test5, "123456");
+    const target06 = con2.get(Test6, "123456");
+    const target07 = con2.get(Test7);
+    const target07_2 = con2.get(Test7);
+
+    const target06_x73 = con2.get(Test6);
+    const target06_x7 = con2.get(Test6, "123457");
 
     expect(target01, "[core/di-base] singleton scoped [same]").to.equal(target02);
 
@@ -176,10 +193,24 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     expect(target03_4.x, "[core/di-base] singleton scoped [same dependencies x]").to.equal(
       target03_4_1.x
     );
+    expect(target06.x, "[core/di-base] singleton scoped [same dependencies x]").to.equal(
+      target03_4_1.x
+    );
     expect(
       target05.x === target03_4.x,
       "[core/di-base] singleton scoped [diff dependencies x]"
     ).to.equal(false);
+    expect(
+      target06.x === target06_x7.x,
+      "[core/di-base] singleton scoped [diff dependencies x]"
+    ).to.equal(false);
+    expect(
+      target06.x === target06_x73.x,
+      "[core/di-base] singleton scoped [diff dependencies x]"
+    ).to.equal(false);
+    expect(target07 === target07_2, "[core/di-base] singleton scoped [same instance]").to.equal(
+      true
+    );
 
     target03_4_1.x.key = 5;
     expect(target03_4.x.key, "[core/di-base] can't resolve depts").to.equal(5);
@@ -189,13 +220,22 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     try {
       const invalidCon = new DIContainer();
 
-      invalidCon.register(SB, SB, InjectScope.Scope);
+      invalidCon.register({ token: SB, imp: SB, scope: InjectScope.Scope });
       invalidCon.complete();
     } catch (error) {
       expect(typeof error.message, "[core/di-base] singleton scoped [after edit key]").to.equal(
         "string"
       );
     }
+  });
+
+  it("dispose", () => {
+    new DI().dispose();
+    new DI().dispose("123456");
+    const di = new DI();
+    di.complete();
+    di.createScope("123456", {});
+    di.dispose("123456");
   });
 
   it("others", () => {

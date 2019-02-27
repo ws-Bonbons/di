@@ -57,20 +57,45 @@ export type ImplementToken<T> = ImplementType<T>;
 
 export type IInjectable = Constructor<IBaseInjectable>;
 
-/** 依赖注入项工长 */
-export type ImplementFactory<T, SCOPE extends ScopeID> = (
+/** 依赖注入项基础构造工厂 */
+export type ImplementBasicFactory<T, SCOPE extends ScopeID, CONTEXT = any> = (
   scopeId?: SCOPE,
-  scopeData?: ScopeMetadata<SCOPE, any>
+  scopeData?: ScopeMetadata<SCOPE, CONTEXT>
 ) => T;
-export type IDeptFactory<T, SCOPE extends ScopeID> = ImplementFactory<T, SCOPE>;
+
+interface IArrayLike {
+  [Symbol.iterator]: any;
+  [Symbol.unscopables]: any;
+}
+
+type ConstructorsTuple<T extends any[]> = IArrayLike &
+  { [key in keyof T]: T[key] extends Constructor<infer TV> ? TV : any };
+
+export type IResolvableFactory<T, DEPTS extends any[] = []> = (...depts: DEPTS) => T;
+
+/** 依赖注入项构造工厂 */
+export type IDeptFactory<
+  T,
+  SCOPE extends ScopeID,
+  DEPTS extends Constructor<any>[] = [],
+  CONTEXT = any
+> = IResolvableFactory<T, ConstructorsTuple<DEPTS>> | ImplementBasicFactory<T, SCOPE, CONTEXT>;
 
 export type InjectDIToken<T> = Constructor<T> | AbstractType<T>;
 export type InjectToken<T> = InjectDIToken<T>;
-export type ImplementDIValue<T, SCOPE extends ScopeID> =
+
+export type ImplementBasicDIValue<T, SCOPE extends ScopeID> =
   | ImplementType<T>
   | T
-  | ImplementFactory<T, SCOPE>;
-export type Implement<T, SCOPE extends ScopeID> = ImplementDIValue<T, SCOPE>;
+  | ImplementBasicFactory<T, SCOPE>;
+export type ImplementDIValue<T, SCOPE extends ScopeID, DEPTS extends any[] = []> =
+  | ImplementType<T>
+  | T
+  | IResolvableFactory<T, DEPTS>;
+
+export type Implement<T, SCOPE extends ScopeID, DEPTS extends any[] = []> =
+  | ImplementBasicDIValue<T, SCOPE>
+  | ImplementDIValue<T, SCOPE, DEPTS>;
 
 export interface IToken<T> {
   key: symbol;
@@ -104,10 +129,17 @@ export type ScopeMetadata<ID, SCOPE> = SCOPE & {
   readonly scopeId: ID;
 };
 
+export interface IRegisterConfig<K, V, ID extends ScopeID, DEPTS extends any[] = []> {
+  token: InjectToken<K>;
+  imp: Implement<V, ID, DEPTS>;
+  scope: InjectScope;
+  depts?: DEPTS;
+}
+
 export interface IDIContainer<ID extends ScopeID = string, SCOPE extends any = any>
   extends ReadonlyDIContainer<ID> {
   count: number;
-  register<K, V>(token: InjectToken<K>, imp: Implement<V, ID>, scope: InjectScope): void;
+  register<K, V, DEPTS extends any[] = []>(config: IRegisterConfig<K, V, ID, DEPTS>): void;
   getDepedencies(depts: InjectToken<any>[], scopeId?: ID): any[];
   getConfig(): any;
   complete(): void;
@@ -145,7 +177,7 @@ export interface DepedencyResolveEntry<T = any> {
  */
 export interface DIContainerEntry<T> extends DepedencyResolveEntry<T> {
   /** 工程方法，手工提供或者由框架生成 */
-  fac: Nullable<ImplementFactory<any, any>>;
+  fac: Nullable<ImplementBasicFactory<any, any>>;
   /** 包裹处理scope之后的工程方法，是解析依赖项的最终执行方法 */
   getInstance: Nullable<(scopeId?: ScopeID) => T | null>;
   /** 当前依赖项的依赖层级，高级依赖低级 */

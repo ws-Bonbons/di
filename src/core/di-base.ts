@@ -2,14 +2,15 @@ import {
   InjectScope,
   Nullable,
   InjectToken,
-  Implement,
-  ImplementFactory,
+  ImplementBasicFactory,
   ScopeID,
   DIContainerEntry,
   DepedencyResolveEntry,
   IDIContainer,
   IContainerConfigs,
   IProxyBundle,
+  IRegisterConfig,
+  PARAMS_META_KEY,
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
@@ -53,12 +54,10 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    */
   protected scopePools: Map<ID, DIScopePool> = new Map<ID, DIScopePool>();
 
-  public abstract register<K, V>(
-    token: InjectToken<K>,
-    imp: Implement<V, ID>,
-    scope: InjectScope
+  public abstract register<K, V, DEPTS extends any[] = []>(
+    configs: IRegisterConfig<K, V, ID, DEPTS>
   ): void;
-  public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementFactory<T, ID>;
+  public abstract createFactory<T>(imp: DIContainerEntry<T>): ImplementBasicFactory<T, ID>;
 
   constructor(configs?: Partial<IContainerConfigs>) {
     this.resetConfigs(configs || {});
@@ -75,12 +74,20 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @memberof DIContainer
    */
   protected set<T>(token: InjectToken<T>, entry: DepedencyResolveEntry<T>) {
-    const { imp } = entry;
+    const { imp, depts } = entry;
     const isFactory = Helpers.isFactory(imp || {});
     const isConstructor = !!(<any>imp).prototype;
+    // 支持依赖工厂函数
+    const isDeptsFactory = isFactory && depts && depts.length > 0;
+    if (isDeptsFactory) {
+      // 修正Token的依赖
+      Reflect.defineMetadata(PARAMS_META_KEY, depts, token);
+    }
+    // 为依赖工厂生成基础工厂函数
+    const factory = isDeptsFactory ? (sid: ID) => imp(...this.getDepedencies(depts, sid)) : imp;
     this.map.set(token, {
       ...entry,
-      fac: isFactory ? <ImplementFactory<any, ID>>imp : !isConstructor ? () => imp : null,
+      fac: isFactory ? factory : !isConstructor ? () => imp : null,
       getInstance: null,
       level: -1,
     });
@@ -228,13 +235,13 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @private
    * @template T
    * @param {DIContainerEntry<T>} item
-   * @param {ImplementFactory<T, ID>} fac
+   * @param {ImplementBasicFactory<T, ID>} fac
    * @returns {(Nullable<(scopeId?: ID) => T | null>)}
    * @memberof DIContainer
    */
   private scopeMark<T>(
     item: DIContainerEntry<T>,
-    fac: ImplementFactory<T, ID>
+    fac: ImplementBasicFactory<T, ID>
   ): Nullable<(scopeId?: ID) => T | null> {
     const { scope, token } = item;
     const useProxy = this.configs.type === "proxy";
