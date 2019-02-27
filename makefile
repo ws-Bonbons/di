@@ -7,6 +7,7 @@ build:
 	yarn run test
 	rm -rf dist
 	tsc
+	cp README.md dist/
 
 rc: build
 	node ./pkg.rc.js
