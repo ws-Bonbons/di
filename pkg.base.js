@@ -8,6 +8,7 @@ module.exports = (args = {}) =>
     whiteSpace: "    ",
     rootPath: ".",
     outDist: "dist",
+    useYarn: true,
     outTransform: json => ({
       ...json,
       main: "./index.js",
