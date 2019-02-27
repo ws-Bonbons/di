@@ -1,12 +1,11 @@
 import "reflect-metadata";
 import { BaseDIContainer, Helpers } from "./di-base";
 import {
-  Implement,
   InjectScope,
-  InjectToken,
   DIContainerEntry,
   ScopeID,
   PARAMS_META_KEY,
+  IRegisterConfig,
 } from "./declares";
 
 export function getDependencies(target: any): any[] {
@@ -31,12 +30,17 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
     return Helpers.isValue(target);
   }
 
-  public register<K, V>(token: InjectToken<K>, imp: Implement<V, ID>, scope: InjectScope) {
+  public register<K, V, DEPTS extends any[] = []>({
+    token,
+    imp,
+    scope,
+    depts,
+  }: IRegisterConfig<K, V, ID, DEPTS>) {
     this.set(token, {
       token,
       imp,
       scope,
-      depts: getDependencies(imp),
+      depts: depts || getDependencies(imp),
     });
   }
 
