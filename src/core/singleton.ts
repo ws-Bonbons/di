@@ -7,12 +7,14 @@ export interface InjectableSingleton {
 
 // tslint:disable-next-line: class-name
 export interface INTERNAL_InjectableSingleton<T extends object = ISingletonUpdates> {
-  prototype: {
-    "@watch": ISingletonWatch;
-  };
+  prototype: ISingletonProto;
   "@delegate": T;
   "@scope": ScopeID;
   OnUpdate(updates: ISingletonUpdates): void;
+}
+
+export interface ISingletonProto {
+  "@watch": ISingletonWatch;
 }
 
 interface ISingletonWatch {
@@ -27,8 +29,6 @@ interface ISingletonUpdates {
 
 export class SingletonBasement<T extends object = ISingletonUpdates>
   implements InjectableSingleton {
-  protected static "@watch": ISingletonWatch = {};
-
   protected readonly "@delegate": T = {} as any;
   protected readonly "@scope"!: ScopeID;
 
