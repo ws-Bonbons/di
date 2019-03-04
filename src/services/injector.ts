@@ -6,16 +6,17 @@ export abstract class Injector implements ReadonlyDIContainer {
 }
 
 // tslint:disable-next-line: class-name
-interface INTERNAL_Injector<T extends ScopeID = string> extends ReadonlyDIContainer {
+export interface INTERNAL_Injector<ID extends ScopeID = string> extends ReadonlyDIContainer<ID> {
+  get<T>(token: InjectDIToken<T>, scopeId?: ID): T;
   INTERNAL_dispose(): void;
-  scopeId?: T;
+  scopeId?: ID;
 }
 
 export function createInjector<T extends ScopeID = string>(
   di: BaseDIContainer<T>
 ): (scopeId?: T) => INTERNAL_Injector<T> {
   return (scopeId?: T) => ({
-    get: (token: InjectToken<any>) => di.get(token, scopeId),
+    get: (token: InjectToken<any>, scope?: T) => di.get(token, scope || scopeId),
     INTERNAL_dispose: () => di.dispose(scopeId),
     scopeId,
   });

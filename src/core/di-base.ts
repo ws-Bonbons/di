@@ -14,6 +14,7 @@ import {
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
+import { INTERNAL_InjectableSingleton } from "./singleton";
 
 type DeptNode = DIContainerEntry<any>;
 
@@ -170,9 +171,28 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    */
   private resolve() {
     const queue = Array.from(this.map.values());
-    this.sort(queue).forEach(
-      item => (item.getInstance = <any>this.scopeMark(item, this.createFactory(item)))
-    );
+    this.sort(queue).forEach(item => {
+      const func = <any>this.scopeMark(item, this.createFactory(item));
+      item.getInstance = func;
+      if (item.scope !== InjectScope.Singleton) return (item.getInstance = func);
+      const proto = item.token.prototype;
+      const shouldWatch = "@watch" in proto && Object.keys(proto.watch).length > 0;
+      if (!shouldWatch) return (item.getInstance = func);
+      const oldFunc = func;
+      const watchFunc = (scopeId?: ScopeID) => {
+        // console.log(scopeId);
+        const source: INTERNAL_InjectableSingleton = oldFunc();
+        const instance: INTERNAL_InjectableSingleton = {
+          ...oldFunc(),
+          "@scope": scopeId,
+        };
+        Object.setPrototypeOf(instance, Object.getPrototypeOf(source));
+        const watch = source.prototype["@watch"];
+        instance.OnUpdate(this.getDepedencies(Object.keys(watch).map(k => watch[k].token)));
+        return instance;
+      };
+      item.getInstance = watchFunc;
+    });
   }
 
   /**

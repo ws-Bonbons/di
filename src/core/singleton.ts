@@ -1,7 +1,18 @@
-import { InjectToken } from "./declares";
+import { InjectToken, ScopeID } from "./declares";
+import { Injector, INTERNAL_Injector } from "../services/injector";
 
 export interface InjectableSingleton {
-  OnUpdate(): void;
+  OnUpdate(updates: ISingletonUpdates): void;
+}
+
+// tslint:disable-next-line: class-name
+export interface INTERNAL_InjectableSingleton<T extends object = ISingletonUpdates> {
+  prototype: {
+    "@watch": ISingletonWatch;
+  };
+  "@delegate": T;
+  "@scope": ScopeID;
+  OnUpdate(updates: ISingletonUpdates): void;
 }
 
 interface ISingletonWatch {
@@ -10,13 +21,23 @@ interface ISingletonWatch {
   };
 }
 
-export class SingletonBasement<T> implements InjectableSingleton {
-  protected readonly "@watch": ISingletonWatch = {};
+interface ISingletonUpdates {
+  [prop: string]: any;
+}
+
+export class SingletonBasement<T extends object = ISingletonUpdates>
+  implements InjectableSingleton {
+  protected static "@watch": ISingletonWatch = {};
+
+  protected readonly "@delegate": T = {} as any;
+  protected readonly "@scope"!: ScopeID;
+
   protected get delegate() {
-    return {} as T;
+    return this["@delegate"] as T;
   }
 
-  OnUpdate(): void {
-    throw new Error("Method not implemented.");
+  OnUpdate(updates: ISingletonUpdates): void {
+    // @ts-ignore fuck type hahahahahaha
+    this["@delegate"] = updates;
   }
 }
