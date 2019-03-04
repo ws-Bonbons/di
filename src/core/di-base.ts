@@ -189,7 +189,11 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
           "@scope": scopeId,
         };
         Object.setPrototypeOf(instance, Object.getPrototypeOf(source));
-        instance.OnUpdate(this.getDepedencies(watchKeys.map(k => watch[k].token)));
+        const updates: any = {};
+        watchKeys.forEach(k => {
+          updates[k] = this.get(watch[k].token, <any>scopeId);
+        });
+        instance.OnUpdate(updates);
         return instance;
       };
       item.getInstance = watchFunc;
