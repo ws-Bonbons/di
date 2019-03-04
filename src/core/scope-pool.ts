@@ -35,7 +35,10 @@ export class DIScopePool<ID extends ScopeID = string, SCOPE = any> {
   }
 
   dispose() {
+    // @ts-ignore resource dispose
     this.scopeMetadata = undefined;
+    this.instanceMap.clear();
+    // @ts-ignore resource dispose
     this.instanceMap = undefined;
   }
 }

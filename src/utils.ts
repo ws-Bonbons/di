@@ -9,7 +9,7 @@ export const Colors = {
   white: "\x1b[37m",
 };
 
-export function setColor(name: string, value: any): string {
+export function setColor(name: keyof typeof Colors, value: any): string {
   return `${Colors[name]}${value}${Colors.reset}`;
 }
 

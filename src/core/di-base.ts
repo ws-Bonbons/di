@@ -52,7 +52,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @protected
    * @memberof DIContainer
    */
-  protected scopePools: Map<ID, DIScopePool> = new Map<ID, DIScopePool>();
+  protected scopePools: Map<ID, DIScopePool<ID>> = new Map();
 
   public abstract register<K, V, DEPTS extends any[] = []>(
     configs: IRegisterConfig<K, V, ID, DEPTS>
@@ -110,7 +110,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     if (scopeId) {
       const pool = this.scopePools.get(scopeId);
       if (pool) pool.dispose();
-      this.scopePools.set(scopeId, undefined);
+      this.scopePools.delete(scopeId);
     }
   }
 
@@ -124,9 +124,9 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @returns {(T | null)}
    * @memberof DIContainer
    */
-  public get<T>(token: InjectToken<T>, scopeId?: ID): T | null {
+  public get<T>(token: InjectToken<T>, scopeId?: ID): T {
     const value = this.map.get(token) || null;
-    if (value === null || value.getInstance === null) return null;
+    if (value === null || value.getInstance === null) return null as any;
     return value.getInstance(scopeId) || null;
   }
 
@@ -171,7 +171,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   private resolve() {
     const queue = Array.from(this.map.values());
     this.sort(queue).forEach(
-      item => (item.getInstance = this.scopeMark(item, this.createFactory(item)))
+      item => (item.getInstance = <any>this.scopeMark(item, this.createFactory(item)))
     );
   }
 
@@ -254,12 +254,12 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
           const pool = this.scopePools.get(<ID>scopeId);
           if (!pool) {
             const metadata = { scopeId };
-            const newPool = new DIScopePool(metadata);
+            const newPool = new DIScopePool<ID>(metadata);
             const instance = useProxy
               ? createProxyInstance(() => fac(scopeId, metadata))
               : fac(scopeId, metadata);
             newPool.setInstance(token, instance);
-            this.scopePools.set(<ID>scopeId, newPool);
+            this.scopePools.set(scopeId, newPool);
             return <T>instance;
           } else {
             const poolInstance = pool.getInstance(token);
@@ -303,14 +303,14 @@ function createProxyInstance<T>(fac: () => T): T {
         target.source = fac();
         target.init = true;
       }
-      return target.source[p];
+      return (<any>target.source)[p];
     },
     set(target: IProxyBundle<T>, p, v) {
       if (!target.init) {
         target.source = fac();
         target.init = true;
       }
-      target.source[p] = v;
+      (<any>target.source)[p] = v;
       return true;
     },
   });
