@@ -6,7 +6,9 @@ import {
   ScopeID,
   PARAMS_META_KEY,
   IRegisterConfig,
+  IContainerConfigs,
 } from "./declares";
+import { Injector, createInjector } from "../services/injector";
 
 export function getDependencies(target: any): any[] {
   return Reflect.getMetadata(PARAMS_META_KEY, target) || [];
@@ -28,6 +30,20 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
 
   public static isValue(target: any): boolean {
     return Helpers.isValue(target);
+  }
+
+  constructor(configs?: Partial<IContainerConfigs>) {
+    super(configs);
+    this.init();
+  }
+
+  protected init() {
+    this.register({
+      token: Injector,
+      imp: createInjector(this),
+      scope: InjectScope.Scope,
+      depts: [],
+    });
   }
 
   public register<K, V, DEPTS extends any[] = []>({

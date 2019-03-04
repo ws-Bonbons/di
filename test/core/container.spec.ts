@@ -56,7 +56,7 @@ defineUnit(["core/container", "Core::Container"], () => {
     expect(con.count, "[core/container.DIContainer.new()] current count").to.equal(0);
 
     con.complete();
-    expect(con.count, "[core/container.DIContainer.complete()] current count").to.equal(2);
+    expect(con.count, "[core/container.DIContainer.complete()] current count").to.equal(3);
 
     expect(
       container.DIContainer.isClass(Test),

@@ -75,7 +75,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
   it("test core/di-base feature : abstract createFactory", () => {
     try {
       con.createFactory({
-        getInstance: () => 2,
+        getInstance: () => new Test(),
         imp: () => 1,
         level: 1,
         fac: () => 5,
@@ -110,7 +110,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const kvs = con2.getConfig();
 
     expect(Object.keys(kvs).length, "[core/di-base] singleton scoped [null no complete]").to.equal(
-      4
+      5
     );
 
     const target01 = con2.get(Test, "123456");
@@ -152,7 +152,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     con2.register({
       token: Test6,
       depts: [Test, Test4],
-      imp: (a, b) => new Test6(a, b),
+      imp: (a: any, b: any) => new Test6(a, b),
       scope: InjectScope.Scope,
     });
 
@@ -166,7 +166,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const kvs = con2.getConfig();
 
     expect(Object.keys(kvs).length, "[core/di-base] singleton scoped [null no complete]").to.equal(
-      6
+      7
     );
 
     const target01 = con2.get(Test, "123456");
