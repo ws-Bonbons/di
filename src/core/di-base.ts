@@ -171,33 +171,44 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    */
   private resolve() {
     const queue = Array.from(this.map.values());
-    this.sort(queue).forEach(item => {
-      const func = <any>this.scopeMark(item, this.createFactory(item));
-      item.getInstance = func;
-      if (item.scope !== InjectScope.Singleton) return (item.getInstance = func);
-      const proto: ISingletonProto = item.token.prototype;
-      const watch = proto["@watch"];
-      const watchKeys = Object.keys(watch || {});
-      const shouldWatch = "@watch" in proto && Object.keys(proto["@watch"]).length > 0;
-      if (!shouldWatch) return (item.getInstance = func);
-      const oldFunc = func;
-      const watchFunc = (scopeId?: ScopeID) => {
-        // console.log(scopeId);
-        const source: INTERNAL_InjectableSingleton = oldFunc();
-        const instance: INTERNAL_InjectableSingleton = {
-          ...oldFunc(),
-          "@scope": scopeId,
-        };
-        Object.setPrototypeOf(instance, Object.getPrototypeOf(source));
-        const updates: any = {};
-        watchKeys.forEach(k => {
-          updates[k] = this.get(watch[k].token, <any>scopeId);
-        });
-        instance.OnUpdate(updates);
-        return instance;
+    this.sort(queue).forEach(
+      item =>
+        (item.getInstance = this.wrapWatchableSingleton(
+          item,
+          this.scopeMark(item, this.createFactory(item))
+        ))
+    );
+  }
+
+  /**
+   * 为可监控依赖变化的注入单例初始化工厂函数
+   * * 如有必要的话- -
+   * @param item
+   * @param func
+   */
+  private wrapWatchableSingleton(item: DIContainerEntry<any>, func: any) {
+    if (item.scope !== InjectScope.Singleton) return func;
+    const proto: ISingletonProto = item.token.prototype;
+    const watch = proto["@watch"];
+    const watchKeys = Object.keys(watch || {});
+    const shouldWatch = "@watch" in proto && Object.keys(proto["@watch"] || {}).length > 0;
+    if (!shouldWatch) return func;
+    const oldFunc = func;
+    return (scopeId?: ScopeID) => {
+      const source: INTERNAL_InjectableSingleton = oldFunc();
+      const instance: INTERNAL_InjectableSingleton = {
+        ...source,
+        // @ts-ignore reset the scopeId of base singleton
+        "@scope": scopeId,
       };
-      item.getInstance = watchFunc;
-    });
+      Object.setPrototypeOf(instance, Object.getPrototypeOf(source));
+      const updates: any = {};
+      watchKeys.forEach(k => {
+        updates[k] = this.get(watch[k].token, <any>scopeId);
+      });
+      instance.OnUpdate(updates);
+      return instance;
+    };
   }
 
   /**
