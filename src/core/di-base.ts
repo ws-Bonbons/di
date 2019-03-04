@@ -176,7 +176,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       item.getInstance = func;
       if (item.scope !== InjectScope.Singleton) return (item.getInstance = func);
       const proto = item.token.prototype;
-      const shouldWatch = "@watch" in proto && Object.keys(proto.watch).length > 0;
+      const shouldWatch = "@watch" in proto && Object.keys(proto["@watch"]).length > 0;
       if (!shouldWatch) return (item.getInstance = func);
       const oldFunc = func;
       const watchFunc = (scopeId?: ScopeID) => {
