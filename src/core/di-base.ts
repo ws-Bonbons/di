@@ -195,7 +195,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     if (!shouldWatch) return func;
     const createSingletonRef = func;
     return (scopeId?: ScopeID) => {
-      const override = proto["@override"] || [];
+      const override = ["@scope", "@delegate", "OnUpdate", ...(proto["@override"] || [])];
       const instance = this.createWatchableSinglton(item, scopeId, override, createSingletonRef());
       const updates: any = {};
       keys.forEach(k => {
@@ -225,13 +225,11 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       const delegator: any = source;
       return new Proxy<INTERNAL_InjectableSingleton>(instance, {
         get(target: any, name) {
-          if (name === "@scope") return target[name];
-          if (name === "@delegate") return target[name];
-          if (name === "OnUpdate") return target[name];
           if (override.indexOf(<string>name) >= 0) return target[name];
           return delegator[name];
         },
-        set(_: any, name, value) {
+        set(target: any, name, value) {
+          if (override.indexOf(<string>name) >= 0) return (target[name] = value);
           return (delegator[name] = value);
         },
       });
@@ -239,9 +237,6 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       // 使用原生模式实现响应式singleton
       Object.getOwnPropertyNames(source).forEach(name => {
         const delegator: any = source;
-        if (name === "@scope") return;
-        if (name === "@delegate") return;
-        if (name === "OnUpdate") return;
         if (override.indexOf(<string>name) >= 0) return;
         Object.defineProperty(instance, name, {
           configurable: false,
