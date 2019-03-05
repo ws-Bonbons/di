@@ -1,5 +1,4 @@
 import { InjectToken, ScopeID } from "./declares";
-import { Injector, INTERNAL_Injector } from "../services/injector";
 
 export interface InjectableSingleton {
   OnUpdate(updates: ISingletonUpdates): void;
