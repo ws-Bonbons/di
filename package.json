@@ -1,6 +1,6 @@
 {
     "name": "@bonbons/di",
-    "version": "1.4.0-rc.12",
+    "version": "1.4.1",
     "description": "依赖注入node.js实现",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
