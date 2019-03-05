@@ -15,6 +15,7 @@ export interface INTERNAL_InjectableSingleton<T extends object = ISingletonUpdat
 
 export interface ISingletonProto {
   "@watch": ISingletonWatch;
+  "@override": string[];
 }
 
 interface ISingletonWatch {

@@ -189,26 +189,73 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   private wrapWatchableSingleton(item: DIContainerEntry<any>, func: any) {
     if (item.scope !== InjectScope.Singleton) return func;
     const proto: ISingletonProto = item.token.prototype;
-    const watch = proto["@watch"];
-    const watchKeys = Object.keys(watch || {});
-    const shouldWatch = "@watch" in proto && Object.keys(proto["@watch"] || {}).length > 0;
+    const watch = proto["@watch"] || {};
+    const keys = Object.keys(watch);
+    const shouldWatch = keys.length > 0;
     if (!shouldWatch) return func;
-    const oldFunc = func;
+    const createSingletonRef = func;
     return (scopeId?: ScopeID) => {
-      const source: INTERNAL_InjectableSingleton = oldFunc();
-      const instance: INTERNAL_InjectableSingleton = {
-        ...source,
-        // @ts-ignore reset the scopeId of base singleton
-        "@scope": scopeId,
-      };
-      Object.setPrototypeOf(instance, Object.getPrototypeOf(source));
+      const override = proto["@override"] || [];
+      const instance = this.createWatchableSinglton(item, scopeId, override, createSingletonRef());
       const updates: any = {};
-      watchKeys.forEach(k => {
+      keys.forEach(k => {
         updates[k] = this.get(watch[k].token, <any>scopeId);
       });
       instance.OnUpdate(updates);
       return instance;
     };
+  }
+
+  private createWatchableSinglton(
+    item: DIContainerEntry<any>,
+    scopeId: string | Symbol | undefined,
+    override: string[],
+    source: INTERNAL_InjectableSingleton
+  ): INTERNAL_InjectableSingleton {
+    const useProxy = this.configs.type === "proxy";
+    const instance = Object.create(item.token.prototype, {
+      "@scope": {
+        writable: false,
+        configurable: false,
+        value: scopeId,
+      },
+    });
+    if (useProxy) {
+      // 使用proxy模式实现响应式singleton
+      const delegator: any = source;
+      return new Proxy<INTERNAL_InjectableSingleton>(instance, {
+        get(target: any, name) {
+          if (name === "@scope") return target[name];
+          if (name === "@delegate") return target[name];
+          if (name === "OnUpdate") return target[name];
+          if (override.indexOf(<string>name) >= 0) return target[name];
+          return delegator[name];
+        },
+        set(_: any, name, value) {
+          return (delegator[name] = value);
+        },
+      });
+    } else {
+      // 使用原生模式实现响应式singleton
+      Object.getOwnPropertyNames(source).forEach(name => {
+        const delegator: any = source;
+        if (name === "@scope") return;
+        if (name === "@delegate") return;
+        if (name === "OnUpdate") return;
+        if (override.indexOf(<string>name) >= 0) return;
+        Object.defineProperty(instance, name, {
+          configurable: false,
+          enumerable: true,
+          get() {
+            return delegator[name];
+          },
+          set(value) {
+            delegator[name] = value;
+          },
+        });
+      });
+      return instance;
+    }
   }
 
   /**
