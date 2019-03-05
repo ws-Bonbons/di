@@ -28,6 +28,10 @@ interface ISingletonUpdates {
   [prop: string]: any;
 }
 
+export function getWatchMetadata<T extends INTERNAL_InjectableSingleton>(target: T) {
+  return (<ISingletonPrototype>(<any>target).prototype)["@watch"] || {};
+}
+
 export class SingletonBasement<T extends object = ISingletonUpdates>
   implements InjectableSingleton {
   protected readonly "@delegate": T = {} as any;

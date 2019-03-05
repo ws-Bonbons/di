@@ -82,6 +82,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
         // @ts-ignore
         token: Test,
         depts: [],
+        watch: [],
         scope: InjectScope.Scope,
       });
     } catch (e) {

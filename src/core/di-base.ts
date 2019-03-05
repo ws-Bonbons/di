@@ -189,9 +189,8 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   private wrapWatchableSingleton(item: DIContainerEntry<any>, func: any) {
     if (item.scope !== InjectScope.Singleton) return func;
     const proto: ISingletonPrototype = item.token.prototype;
-    const watch = proto["@watch"] || {};
-    const keys = Object.keys(watch);
-    const shouldWatch = keys.length > 0;
+    const watch = item.watch || [];
+    const shouldWatch = watch.length > 0;
     if (!shouldWatch) return func;
     const createSingletonRef = func;
     return (scopeId?: ScopeID) => {
@@ -204,8 +203,8 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       ];
       const instance = this.createWatchableSinglton(item, scopeId, override, createSingletonRef());
       const updates: any = {};
-      keys.forEach(k => {
-        updates[k] = this.get(watch[k].token, <any>scopeId);
+      watch.forEach(([key, token]) => {
+        updates[key] = this.get(token, <any>scopeId);
       });
       instance.OnUpdate(updates);
       return instance;
