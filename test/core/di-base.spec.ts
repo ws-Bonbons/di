@@ -9,6 +9,7 @@ import {
 import { DIContainer } from "../../src/core/container";
 import { expect } from "chai";
 import { defineUnit } from "../unit";
+import { SingletonBasement } from "../../src/core/singleton";
 
 class DI extends DIBASE.BaseDIContainer<string> {
   public register<K, V, DEPTS extends any[] = []>(
@@ -42,7 +43,24 @@ class Test6 {
   constructor(public x: Test, public y: Test4) {}
 }
 
-class Test7 {}
+class Test7 {
+  c = 12345;
+}
+
+class Test8 extends SingletonBasement<{ x: Test7 }> {
+  get XX() {
+    return this.delegate.x;
+  }
+
+  edf = 4352345345;
+}
+
+// @ts-ignore
+Test8.prototype["@watch"] = {
+  x: { token: Test7 },
+};
+// @ts-ignore
+Test8.prototype["@override"] = ["XX"];
 
 const dps4 = Reflect.getMetadata(PARAMS_META_KEY, Test4) || [];
 Reflect.defineMetadata(PARAMS_META_KEY, [...dps4, Test], Test4);
@@ -101,6 +119,8 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     con2.register({ token: Test3, imp: () => xT3, scope: InjectScope.Scope });
     con2.register({ token: Test4, imp: Test4, scope: InjectScope.Scope });
     con2.register({ token: Test5, imp: xT5, scope: InjectScope.Scope });
+    con2.register({ token: Test7, imp: Test7, scope: InjectScope.Scope });
+    con2.register({ token: Test8, imp: Test8, scope: InjectScope.Singleton });
 
     const target0x = con2.get(Test, "123456");
 
@@ -111,7 +131,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const kvs = con2.getConfig();
 
     expect(Object.keys(kvs).length, "[core/di-base] singleton scoped [null no complete]").to.equal(
-      5
+      7
     );
 
     const target01 = con2.get(Test, "123456");
@@ -121,6 +141,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const target03_4 = con2.get(Test4, "123456");
     const target03_4_1 = con2.get(Test4, "123456");
     const target05 = con2.get(Test5, "123456");
+    const target08 = con2.get(Test8, "123456");
 
     expect(target01, "[core/di-base] singleton scoped [same]").to.equal(target02);
 
@@ -135,6 +156,36 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
       target05.x === target03_4.x,
       "[core/di-base] singleton scoped [diff dependencies x]"
     ).to.equal(false);
+
+    expect(target08.XX.c, "[core/di-base] react singleton dept").to.equal(12345);
+    target08.XX.c += 1;
+
+    const target08_2 = con2.get(Test8);
+    expect(target08_2.XX.c, "[core/di-base] react singleton dept").to.equal(12345);
+
+    const target08_3 = con2.get(Test8, "123456");
+    expect(target08_3.XX.c, "[core/di-base] react singleton dept").to.equal(12346);
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    expect(target08_2["ccccc"], "[core/di-base] react singleton dept").to.equal(undefined);
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    target08["ccccc"] = 242134234;
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    expect(target08_2["ccccc"], "[core/di-base] react singleton dept").to.equal(undefined);
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    expect(target08_3["ccccc"], "[core/di-base] react singleton dept").to.equal(undefined); // ! 警告⚠️： 原生模式无法动态的添加字段，只能相应初始化过的属性
+
+    expect(target08_3.edf, "[core/di-base] react singleton dept").to.equal(4352345345);
+
+    target08_3.edf = 555;
+    expect(target08.edf, "[core/di-base] react singleton dept").to.equal(555);
   });
 
   con2 = new DIContainer();
@@ -149,6 +200,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     con2.register({ token: Test4, imp: Test4, scope: InjectScope.Scope });
     con2.register({ token: Test5, imp: xT5, scope: InjectScope.Scope });
     con2.register({ token: Test7, imp: Test7, scope: InjectScope.Singleton });
+    con2.register({ token: Test8, imp: Test8, scope: InjectScope.Singleton });
 
     con2.register({
       token: Test6,
@@ -167,7 +219,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const kvs = con2.getConfig();
 
     expect(Object.keys(kvs).length, "[core/di-base] singleton scoped [null no complete]").to.equal(
-      7
+      8
     );
 
     const target01 = con2.get(Test, "123456");
@@ -180,6 +232,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
     const target06 = con2.get(Test6, "123456");
     const target07 = con2.get(Test7);
     const target07_2 = con2.get(Test7);
+    const target08 = con2.get(Test8);
 
     const target06_x73 = con2.get(Test6);
     const target06_x7 = con2.get(Test6, "123457");
@@ -215,6 +268,24 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
 
     target03_4_1.x.key = 5;
     expect(target03_4.x.key, "[core/di-base] can't resolve depts").to.equal(5);
+
+    expect(target08.XX.c, "[core/di-base] react singleton dept").to.equal(12345);
+    target08.XX.c += 1;
+
+    const target08_2 = con2.get(Test8);
+    expect(target08_2.XX.c, "[core/di-base] react singleton dept").to.equal(12346);
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    expect(target08_2["ccccc"], "[core/di-base] react singleton dept").to.equal(undefined);
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    target08["ccccc"] = 242134234;
+
+    // @ts-ignore
+    // tslint:disable-next-line: no-string-literal
+    expect(target08_2["ccccc"], "[core/di-base] react singleton dept").to.equal(242134234);
   });
 
   it("resolve errors", () => {
