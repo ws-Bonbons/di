@@ -13,7 +13,9 @@ defineUnit(["utils", "Utils工具包"], () => {
 
   it("test utils.setColor", () => {
     expect(typeof utils.setColor, "[utils.setColor] 's type ").to.equal("function");
-    expect(typeof utils.setColor("a", "b"), "[utils.setColor] 's return type ").to.equal("string");
+    expect(typeof utils.setColor("red", "b"), "[utils.setColor] 's return type ").to.equal(
+      "string"
+    );
   });
 
   it("test utils.isFunction", () => {

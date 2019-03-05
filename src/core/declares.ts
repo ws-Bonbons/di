@@ -162,6 +162,8 @@ export interface DepedencyResolveEntry<T = any> {
   imp: any;
   /** 依赖的其他令牌数组 */
   depts: InjectToken<any>[];
+  /** React-Singleton依赖令牌数组 */
+  watch: [string, InjectToken<any>][];
   /** 注入项的生命周期和解析范围 */
   scope: InjectScope;
 }

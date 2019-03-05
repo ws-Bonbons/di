@@ -6,7 +6,12 @@ import {
   ScopeID,
   PARAMS_META_KEY,
   IRegisterConfig,
+  IContainerConfigs,
+  InjectDIToken,
+  InjectToken,
 } from "./declares";
+import { Injector, createInjector } from "../services/injector";
+import { getWatchMetadata } from "./singleton";
 
 export function getDependencies(target: any): any[] {
   return Reflect.getMetadata(PARAMS_META_KEY, target) || [];
@@ -30,6 +35,20 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
     return Helpers.isValue(target);
   }
 
+  constructor(configs?: Partial<IContainerConfigs>) {
+    super(configs);
+    this.init();
+  }
+
+  protected init() {
+    this.register({
+      token: Injector,
+      imp: createInjector(this),
+      scope: InjectScope.Scope,
+      depts: [],
+    });
+  }
+
   public register<K, V, DEPTS extends any[] = []>({
     token,
     imp,
@@ -41,6 +60,7 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
       imp,
       scope,
       depts: depts || getDependencies(imp),
+      watch: resolveDepts(scope, token),
     });
   }
 
@@ -51,4 +71,10 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
     }
     return item.fac;
   }
+}
+
+function resolveDepts(scope: InjectScope, token: InjectDIToken<any>) {
+  if (scope !== InjectScope.Singleton) return [];
+  const watch = getWatchMetadata(<any>token);
+  return Object.keys(watch).map<[string, InjectToken<any>]>(name => [name, watch[name].token]);
 }

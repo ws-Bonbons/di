@@ -14,6 +14,7 @@ import {
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
+import { INTERNAL_InjectableSingleton, ISingletonPrototype } from "./singleton";
 
 type DeptNode = DIContainerEntry<any>;
 
@@ -52,7 +53,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @protected
    * @memberof DIContainer
    */
-  protected scopePools: Map<ID, DIScopePool> = new Map<ID, DIScopePool>();
+  protected scopePools: Map<ID, DIScopePool<ID>> = new Map();
 
   public abstract register<K, V, DEPTS extends any[] = []>(
     configs: IRegisterConfig<K, V, ID, DEPTS>
@@ -110,7 +111,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     if (scopeId) {
       const pool = this.scopePools.get(scopeId);
       if (pool) pool.dispose();
-      this.scopePools.set(scopeId, undefined);
+      this.scopePools.delete(scopeId);
     }
   }
 
@@ -124,9 +125,9 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    * @returns {(T | null)}
    * @memberof DIContainer
    */
-  public get<T>(token: InjectToken<T>, scopeId?: ID): T | null {
+  public get<T>(token: InjectToken<T>, scopeId?: ID): T {
     const value = this.map.get(token) || null;
-    if (value === null || value.getInstance === null) return null;
+    if (value === null || value.getInstance === null) return null as any;
     return value.getInstance(scopeId) || null;
   }
 
@@ -171,8 +172,90 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   private resolve() {
     const queue = Array.from(this.map.values());
     this.sort(queue).forEach(
-      item => (item.getInstance = this.scopeMark(item, this.createFactory(item)))
+      item =>
+        (item.getInstance = this.wrapWatchableSingleton(
+          item,
+          this.scopeMark(item, this.createFactory(item))
+        ))
     );
+  }
+
+  /**
+   * 为可监控依赖变化的注入单例初始化工厂函数
+   * * 如有必要的话- -
+   * @param item
+   * @param func
+   */
+  private wrapWatchableSingleton(item: DIContainerEntry<any>, func: any) {
+    if (item.scope !== InjectScope.Singleton) return func;
+    const proto: ISingletonPrototype = item.token.prototype;
+    const watch = item.watch || [];
+    const shouldWatch = watch.length > 0;
+    if (!shouldWatch) return func;
+    const createSingletonRef = func;
+    return (scopeId?: ScopeID) => {
+      const override = [
+        "@scope", // scopeid
+        "@delegate", // internal delegate agent
+        "delegate", // delegator for watched depts
+        "OnUpdate", // depts update hook
+        ...(proto["@override"] || []),
+      ];
+      const instance = this.createWatchableSinglton(item, scopeId, override, createSingletonRef());
+      const updates: any = {};
+      watch.forEach(([key, token]) => {
+        updates[key] = this.get(token, <any>scopeId);
+      });
+      instance.OnUpdate(updates);
+      return instance;
+    };
+  }
+
+  private createWatchableSinglton(
+    item: DIContainerEntry<any>,
+    scopeId: string | Symbol | undefined,
+    override: string[],
+    source: INTERNAL_InjectableSingleton
+  ): INTERNAL_InjectableSingleton {
+    const useProxy = this.configs.type === "proxy";
+    const instance = Object.create(item.token.prototype, {
+      "@scope": {
+        writable: false,
+        configurable: false,
+        value: scopeId,
+      },
+    });
+    if (useProxy) {
+      // 使用proxy模式实现响应式singleton
+      const delegator: any = source;
+      return new Proxy<INTERNAL_InjectableSingleton>(instance, {
+        get(target: any, name) {
+          if (override.indexOf(<string>name) >= 0) return target[name];
+          return delegator[name];
+        },
+        set(target: any, name, value) {
+          if (override.indexOf(<string>name) >= 0) return (target[name] = value);
+          return (delegator[name] = value);
+        },
+      });
+    } else {
+      // 使用原生模式实现响应式singleton
+      Object.getOwnPropertyNames(source).forEach(name => {
+        const delegator: any = source;
+        if (override.indexOf(<string>name) >= 0) return;
+        Object.defineProperty(instance, name, {
+          configurable: false,
+          enumerable: true,
+          get() {
+            return delegator[name];
+          },
+          set(value) {
+            delegator[name] = value;
+          },
+        });
+      });
+      return instance;
+    }
   }
 
   /**
@@ -254,12 +337,12 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
           const pool = this.scopePools.get(<ID>scopeId);
           if (!pool) {
             const metadata = { scopeId };
-            const newPool = new DIScopePool(metadata);
+            const newPool = new DIScopePool<ID>(metadata);
             const instance = useProxy
               ? createProxyInstance(() => fac(scopeId, metadata))
               : fac(scopeId, metadata);
             newPool.setInstance(token, instance);
-            this.scopePools.set(<ID>scopeId, newPool);
+            this.scopePools.set(scopeId, newPool);
             return <T>instance;
           } else {
             const poolInstance = pool.getInstance(token);
@@ -303,14 +386,14 @@ function createProxyInstance<T>(fac: () => T): T {
         target.source = fac();
         target.init = true;
       }
-      return target.source[p];
+      return (<any>target.source)[p];
     },
     set(target: IProxyBundle<T>, p, v) {
       if (!target.init) {
         target.source = fac();
         target.init = true;
       }
-      target.source[p] = v;
+      (<any>target.source)[p] = v;
       return true;
     },
   });
