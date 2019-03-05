@@ -7,8 +7,11 @@ import {
   PARAMS_META_KEY,
   IRegisterConfig,
   IContainerConfigs,
+  Implement,
+  InjectDIToken,
 } from "./declares";
 import { Injector, createInjector } from "../services/injector";
+import { ISingletonPrototype } from "./singleton";
 
 export function getDependencies(target: any): any[] {
   return Reflect.getMetadata(PARAMS_META_KEY, target) || [];
@@ -56,7 +59,7 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
       token,
       imp,
       scope,
-      depts: depts || getDependencies(imp),
+      depts: resolveDepts(depts || getDependencies(imp), scope, token),
     });
   }
 
@@ -67,4 +70,13 @@ export class DIContainer<ID extends ScopeID = string, SCOPE = any> extends BaseD
     }
     return item.fac;
   }
+}
+
+function resolveDepts(depts: any[], scope: InjectScope, token: InjectDIToken<any>) {
+  const watch = (<ISingletonPrototype>(<any>token).prototype)["@watch"] || {};
+  return [
+    ...depts,
+    // for react singleton depts check
+    ...(scope !== InjectScope.Singleton ? [] : Object.keys(watch).map(name => watch[name].token)),
+  ];
 }

@@ -14,7 +14,7 @@ import {
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
-import { INTERNAL_InjectableSingleton, ISingletonProto } from "./singleton";
+import { INTERNAL_InjectableSingleton, ISingletonPrototype } from "./singleton";
 
 type DeptNode = DIContainerEntry<any>;
 
@@ -188,7 +188,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
    */
   private wrapWatchableSingleton(item: DIContainerEntry<any>, func: any) {
     if (item.scope !== InjectScope.Singleton) return func;
-    const proto: ISingletonProto = item.token.prototype;
+    const proto: ISingletonPrototype = item.token.prototype;
     const watch = proto["@watch"] || {};
     const keys = Object.keys(watch);
     const shouldWatch = keys.length > 0;

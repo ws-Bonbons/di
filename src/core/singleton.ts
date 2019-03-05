@@ -7,13 +7,13 @@ export interface InjectableSingleton {
 
 // tslint:disable-next-line: class-name
 export interface INTERNAL_InjectableSingleton<T extends object = ISingletonUpdates> {
-  prototype: ISingletonProto;
+  prototype: ISingletonPrototype;
   "@delegate": T;
   "@scope": ScopeID;
   OnUpdate(updates: ISingletonUpdates): void;
 }
 
-export interface ISingletonProto {
+export interface ISingletonPrototype {
   "@watch": ISingletonWatch;
   "@override": string[];
 }
