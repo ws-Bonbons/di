@@ -195,7 +195,13 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     if (!shouldWatch) return func;
     const createSingletonRef = func;
     return (scopeId?: ScopeID) => {
-      const override = ["@scope", "@delegate", "OnUpdate", ...(proto["@override"] || [])];
+      const override = [
+        "@scope", // scopeid
+        "@delegate", // internal delegate agent
+        "delegate", // delegator for watched depts
+        "OnUpdate", // depts update hook
+        ...(proto["@override"] || []),
+      ];
       const instance = this.createWatchableSinglton(item, scopeId, override, createSingletonRef());
       const updates: any = {};
       keys.forEach(k => {
