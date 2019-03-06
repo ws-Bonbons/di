@@ -1,10 +1,12 @@
 export interface Constructor<T> {
   new (...args: any[]): T;
   prototype: T;
+  name?: string;
 }
 
 export interface AbstractType<T> {
   prototype: T;
+  name?: string;
 }
 
 /** 用来区分范围的id，范围注入依赖于这个id来实现 */
@@ -184,6 +186,8 @@ export interface DIContainerEntry<T> extends DepedencyResolveEntry<T> {
   getInstance: Nullable<(scopeId?: ScopeID) => T | null>;
   /** 当前依赖项的依赖层级，高级依赖低级 */
   level: number;
+  /** 注入的历史，包含所有覆盖行为的操作栈 */
+  history: DepedencyResolveEntry[];
 }
 
 export interface IToken<T> {

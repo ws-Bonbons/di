@@ -69,6 +69,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
 
   constructor(configs?: Partial<IContainerConfigs>) {
     this.resetConfigs(configs || {});
+    this.emitMessage("info", `DI init...`);
   }
 
   /**
@@ -93,12 +94,23 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     }
     // 为依赖工厂生成基础工厂函数
     const factory = isDeptsFactory ? (sid: ID) => imp(...this.getDepedencies(depts, sid)) : imp;
+    const origin = this.map.get(token);
+    let history: DepedencyResolveEntry<T>[] = [entry];
+    if (origin) {
+      history = [...(origin.history || []), entry];
+      this.emitMessage(
+        "warn",
+        `replace injection -> [${token.name}], all history count: [${history.length}]`
+      );
+    }
     this.map.set(token, {
       ...entry,
       fac: isFactory ? factory : !isConstructor ? () => imp : null,
       getInstance: null,
       level: -1,
+      history,
     });
+    this.emitMessage("info", `register injection -> [${token.name}]`);
   }
 
   public resetConfigs(configs: Partial<IContainerConfigs>) {
@@ -125,6 +137,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
 
   public complete(): void {
     this.resolve();
+    this.emitMessage("info", `DI resolved.`);
   }
 
   public createScope(scopeId: ID, metadata: SCOPE) {
@@ -136,6 +149,9 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       const pool = this.scopePools.get(scopeId);
       if (pool) pool.dispose();
       this.scopePools.delete(scopeId);
+      this.emitMessage("info", `DI scope [${scopeId}] all disposed.`);
+    } else {
+      this.emitMessage("warn", `DI scope to be disposed is not valid.`);
     }
   }
 
