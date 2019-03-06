@@ -195,8 +195,18 @@ export interface IEntry<T> {
   value: T;
 }
 
+export type EmitType = "info" | "error" | "warn";
+
+interface EmitPayload {
+  level: EmitType;
+  data: { msg: string; [prop: string]: any };
+  error?: Error;
+}
+
 export interface IContainerConfigs {
   type: "native" | "proxy";
+  onEmit?: (e: EmitPayload) => void;
+  throws?: boolean;
 }
 
 export interface IProxyBundle<T = any> {
