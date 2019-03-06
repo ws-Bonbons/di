@@ -100,7 +100,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       history = [...(origin.history || []), entry];
       this.emitMessage(
         "warn",
-        `replace injection -> [${token.name}], all history count: [${history.length}]`
+        `replace injection -> [${(<any>token).name}], all history count: [${history.length}]`
       );
     }
     this.map.set(token, {
@@ -110,7 +110,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       level: -1,
       history,
     });
-    this.emitMessage("info", `register injection -> [${token.name}]`);
+    this.emitMessage("info", `register injection -> [${(<any>token).name}]`);
   }
 
   public resetConfigs(configs: Partial<IContainerConfigs>) {

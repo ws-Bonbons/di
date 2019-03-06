@@ -1,12 +1,10 @@
 export interface Constructor<T> {
   new (...args: any[]): T;
   prototype: T;
-  name?: string;
 }
 
 export interface AbstractType<T> {
   prototype: T;
-  name?: string;
 }
 
 /** 用来区分范围的id，范围注入依赖于这个id来实现 */
