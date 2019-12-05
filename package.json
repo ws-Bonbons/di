@@ -1,6 +1,6 @@
 {
     "name": "@bonbons/di",
-    "version": "1.4.1-rc.2",
+    "version": "2.0.0-beta.3",
     "description": "依赖注入node.js实现",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -43,6 +43,9 @@
     },
     "dependencies": {
         "reflect-metadata": "^0.1.12"
+    },
+    "optionalDependencies": {
+        "@types/node": "^10.3.2"
     },
     "devDependencies": {
         "@bigmogician/publisher": "^1.0.12",

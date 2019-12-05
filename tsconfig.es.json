@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "es2015",
+        "sourceMap": false,
+        "declaration": false,
+        "outDir": "./dist/packages/es"
+    }
+}
