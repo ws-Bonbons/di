@@ -184,6 +184,8 @@ export interface DIContainerEntry<T> extends DepedencyResolveEntry<T> {
   getInstance: Nullable<(scopeId?: ScopeID) => T | null>;
   /** 当前依赖项的依赖层级，高级依赖低级 */
   level: number;
+  /** 注入的历史，包含所有覆盖行为的操作栈 */
+  history: DepedencyResolveEntry[];
 }
 
 export interface IToken<T> {
@@ -195,8 +197,18 @@ export interface IEntry<T> {
   value: T;
 }
 
+export type EmitType = "info" | "error" | "warn";
+
+interface EmitPayload {
+  level: EmitType;
+  data: { msg: string; [prop: string]: any };
+  error?: Error;
+}
+
 export interface IContainerConfigs {
   type: "native" | "proxy";
+  onEmit?: (e: EmitPayload) => void;
+  throws?: boolean;
 }
 
 export interface IProxyBundle<T = any> {

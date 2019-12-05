@@ -11,12 +11,17 @@ import {
   IProxyBundle,
   IRegisterConfig,
   PARAMS_META_KEY,
+  EmitType,
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
 import { isFunction, setColor } from "../utils";
 import { INTERNAL_InjectableSingleton, ISingletonPrototype } from "./singleton";
 
 type DeptNode = DIContainerEntry<any>;
+
+interface IInnerConfigs extends IContainerConfigs {
+  emit: boolean;
+}
 
 export const Helpers = {
   isFactory(target: any): boolean {
@@ -39,8 +44,10 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   private map = new Map<any, DeptNode>();
   private sorted: DeptNode[] = [];
 
-  private configs: IContainerConfigs = {
+  private configs: IInnerConfigs = {
     type: "native",
+    emit: false,
+    throws: true,
   };
 
   public get count(): number {
@@ -62,6 +69,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
 
   constructor(configs?: Partial<IContainerConfigs>) {
     this.resetConfigs(configs || {});
+    this.emitMessage("info", `DI init...`);
   }
 
   /**
@@ -86,21 +94,50 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
     }
     // 为依赖工厂生成基础工厂函数
     const factory = isDeptsFactory ? (sid: ID) => imp(...this.getDepedencies(depts, sid)) : imp;
+    const origin = this.map.get(token);
+    let history: DepedencyResolveEntry<T>[] = [entry];
+    if (origin) {
+      history = [...(origin.history || []), entry];
+      this.emitMessage(
+        "warn",
+        `replace injection -> [${(<any>token).name}], all history count: [${history.length}]`
+      );
+    }
     this.map.set(token, {
       ...entry,
       fac: isFactory ? factory : !isConstructor ? () => imp : null,
       getInstance: null,
       level: -1,
+      history,
     });
+    this.emitMessage("info", `register injection -> [${(<any>token).name}]`);
   }
 
   public resetConfigs(configs: Partial<IContainerConfigs>) {
     this.configs = { ...this.configs, ...(configs || {}) };
+    if (configs && configs.onEmit) {
+      this.configs.emit = true;
+    }
     return this;
+  }
+
+  private emitMessage(level: EmitType, msg: any, error?: Error) {
+    if (this.configs.emit) {
+      this.configs.onEmit!({
+        level,
+        data: typeof msg === "string" ? { msg } : { msg: "", ...msg },
+        error,
+      });
+      return;
+    }
+    if (this.configs.throws && error) {
+      throw error;
+    }
   }
 
   public complete(): void {
     this.resolve();
+    this.emitMessage("info", `DI resolved.`);
   }
 
   public createScope(scopeId: ID, metadata: SCOPE) {
@@ -112,6 +149,9 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
       const pool = this.scopePools.get(scopeId);
       if (pool) pool.dispose();
       this.scopePools.delete(scopeId);
+      this.emitMessage("info", `DI scope [${scopeId}] all disposed.`);
+    } else {
+      this.emitMessage("warn", `DI scope to be disposed is not valid.`);
     }
   }
 
@@ -259,7 +299,7 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   }
 
   /**
-   * 依赖堆叠算法
+   * 依赖算法
    * ---
    * * 将依赖项按照依赖级别从低到高排列
    * * 每个实例的依赖项级别一定低于自身
@@ -304,11 +344,47 @@ export abstract class BaseDIContainer<ID extends ScopeID = string, SCOPE extends
   ) {
     if (queue.length === 0) return;
     // 获得当前级别的依赖数组
-    const wants = queue.filter(item => resolveUnder(item, sections, current - 1, sourceQueue));
+    const wants = queue.filter(item => this.resolveUnder(item, sections, current - 1, sourceQueue));
     if (wants.length === 0) return;
     sections[current] = wants;
     // 继续处理上一级别依赖
     this.decideSection(queue.filter(i => !wants.includes(i)), sourceQueue, sections, current + 1);
+  }
+
+  /**
+   * 依次递归解析下一层级的依赖信息
+   *
+   * @author Big Mogician
+   * @private
+   * @param {DeptNode} node
+   * @param {Array<DeptNode[]>} sections
+   * @param {number} checkIndex
+   * @param {DeptNode[]} sourceQueue
+   * @memberof BaseDIContainer
+   */
+  private resolveUnder(
+    node: DeptNode,
+    sections: Array<DeptNode[]>,
+    checkIndex: number,
+    sourceQueue: DeptNode[]
+  ) {
+    const checkArr: DeptNode[] = [];
+    if (checkIndex < 0) return false;
+    let index = checkIndex;
+    while (index >= 0) {
+      // 将之前解析的依赖以此获取组合，作为本次处理的依赖源
+      checkArr.push(...sections[index]);
+      index--;
+    }
+    // 只有当所有依赖都来自于依赖源，才能作为这一级别依赖的成员
+    // 所以这里需要检查节点的所有depts
+    const isresolved = node.depts.every(i => checkArr.map(m => m.token).includes(i));
+    // 任何不可达错误发生，可以中断应用程序
+    if (!isresolved && !node.depts.every(i => sourceQueue.map(m => m.token).includes(i))) {
+      const error = resolveError(node.imp, node.depts);
+      this.emitMessage("error", error.message, error);
+    }
+    return isresolved;
   }
 
   /**
@@ -397,40 +473,6 @@ function createProxyInstance<T>(fac: () => T): T {
       return true;
     },
   });
-}
-
-/**
- * 依次递归解析下一层级的依赖信息
- * @description
- * @author Big Mogician
- * @param {DeptNode} node
- * @param {Array<DeptNode[]>} sections
- * @param {number} checkIndex
- * @param {DeptNode[]} sourceQueue
- * @returns
- */
-function resolveUnder(
-  node: DeptNode,
-  sections: Array<DeptNode[]>,
-  checkIndex: number,
-  sourceQueue: DeptNode[]
-) {
-  const checkArr: DeptNode[] = [];
-  if (checkIndex < 0) return false;
-  let index = checkIndex;
-  while (index >= 0) {
-    // 将之前解析的依赖以此获取组合，作为本次处理的依赖源
-    checkArr.push(...sections[index]);
-    index--;
-  }
-  // 只有当所有依赖都来自于依赖源，才能作为这一级别依赖的成员
-  // 所以这里需要检查节点的所有depts
-  const isresolved = node.depts.every(i => checkArr.map(m => m.token).includes(i));
-  // 任何不可达错误发生，可以中断应用程序
-  if (!isresolved && !node.depts.every(i => sourceQueue.map(m => m.token).includes(i))) {
-    throw resolveError(node.imp, node.depts);
-  }
-  return isresolved;
 }
 
 function resolveError(el: any, depts: any[]) {

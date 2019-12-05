@@ -101,6 +101,7 @@ defineUnit(["core/di-base", "Core::DiBase"], () => {
         token: Test,
         depts: [],
         watch: [],
+        history: [],
         scope: InjectScope.Scope,
       });
     } catch (e) {
